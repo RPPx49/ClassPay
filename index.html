@@ -1542,6 +1542,7 @@
         }
 
         // โหลดข้อมูลสมาชิกสำหรับจัดการ
+        // ...existing code...
         function loadMemberManageTable() {
             const tableBody = document.getElementById('memberManageTable');
             tableBody.innerHTML = '<tr><td colspan="4" class="py-4 px-4 text-center text-gray-500">กำลังโหลดข้อมูล...</td></tr>';
@@ -1559,22 +1560,24 @@
                         return;
                     }
                     const users = snapshot.val();
-                    Object.keys(users).forEach(uid => {
-                        const user = users[uid];
+                    // แปลงเป็น array แล้ว sort ตาม studentId
+                    const userArr = Object.keys(users).map(uid => ({ uid, ...users[uid] }));
+                    userArr.sort((a, b) => a.studentId.localeCompare(b.studentId));
+                    userArr.forEach(user => {
                         const row = document.createElement('tr');
-
+        
                         // รหัสนักศึกษา
                         const idCell = document.createElement('td');
                         idCell.className = 'py-3 px-4 border-b';
                         idCell.textContent = user.studentId;
                         row.appendChild(idCell);
-
+        
                         // ชื่อ
                         const nameCell = document.createElement('td');
                         nameCell.className = 'py-3 px-4 border-b';
                         nameCell.textContent = user.name;
                         row.appendChild(nameCell);
-
+        
                         // ห้อง (แก้ไขได้)
                         const classCell = document.createElement('td');
                         classCell.className = 'py-3 px-4 border-b text-center';
@@ -1584,24 +1587,25 @@
                             <option value="1" ${user.class == 1 ? 'selected' : ''}>1</option>
                             <option value="2" ${user.class == 2 ? 'selected' : ''}>2</option>
                         `;
-                        classSelect.onchange = () => updateUserClass(uid, classSelect.value);
+                        classSelect.onchange = () => updateUserClass(user.uid, classSelect.value);
                         classCell.appendChild(classSelect);
                         row.appendChild(classCell);
-
+        
                         // การจัดการ (ลบ)
                         const actionCell = document.createElement('td');
                         actionCell.className = 'py-3 px-4 border-b text-center';
                         const delBtn = document.createElement('button');
                         delBtn.className = 'bg-red-500 hover:bg-red-600 text-white text-xs py-1 px-3 rounded';
                         delBtn.textContent = 'ลบ';
-                        delBtn.onclick = () => deleteUser(uid, user.studentId);
+                        delBtn.onclick = () => deleteUser(user.uid, user.studentId);
                         actionCell.appendChild(delBtn);
                         row.appendChild(actionCell);
-
+        
                         tableBody.appendChild(row);
                     });
                 });
         }
+// ...existing code...
 
         // ฟังก์ชันแก้ไขห้อง
         function updateUserClass(uid, newClass) {
