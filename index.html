@@ -1615,7 +1615,16 @@
                 });
         }
 // ...existing code...
-
+        document.addEventListener('DOMContentLoaded', function() {
+            // ...existing code...
+            const classFilter = document.getElementById('classFilter');
+            if (classFilter) {
+                classFilter.addEventListener('change', function() {
+                    loadPaymentData();
+                });
+            }
+        });
+        
         // ฟังก์ชันแก้ไขห้อง
         function updateUserClass(uid, newClass) {
             showLoading();
