@@ -827,62 +827,37 @@
         // Load student payment data
         function loadStudentPaymentData(studentId) {
             showLoading();
-            database.ref('payments').orderByChild('studentId').equalTo(studentId).once('value')
+            // ดึง payments ทั้งหมด (ไม่ใช่แค่ของนักเรียนนี้)
+            database.ref('payments').once('value')
                 .then((snapshot) => {
+                    const allPayments = snapshot.val() || {};
+                    // หาเดือน-ปีที่มีในระบบ (Set)
+                    const monthYearSet = new Set();
+                    Object.values(allPayments).forEach(payment => {
+                        if (payment.month && payment.year) {
+                            monthYearSet.add(`${parseInt(payment.month)}-${payment.year}`);
+                        }
+                    });
+                    // เรียงเดือน-ปี
+                    const sortedMonthYears = Array.from(monthYearSet).sort((a, b) => {
+                        const [mA, yA] = a.split('-').map(Number);
+                        const [mB, yB] = b.split('-').map(Number);
+                        return yA !== yB ? yA - yB : mA - mB;
+                    });
+
+                    // ดึง payment ของนักเรียนนี้
+                    const studentPayments = {};
+                    Object.keys(allPayments).forEach(key => {
+                        const p = allPayments[key];
+                        if (p.studentId === studentId) {
+                            studentPayments[`${parseInt(p.month)}-${p.year}`] = p;
+                        }
+                    });
+
+                    // สร้างตาราง
                     const tableBody = document.getElementById('studentPaymentTable');
                     tableBody.innerHTML = '';
-                    
-                    if (snapshot.exists()) {
-                        const payments = snapshot.val();
-                        const paymentsByMonth = {};
-                        
-                        // Group payments by month and year
-                        Object.keys(payments).forEach(key => {
-                            const payment = payments[key];
-                            const monthYear = `${payment.month}-${payment.year}`;
-                            paymentsByMonth[monthYear] = payment;
-                        });
-                        
-                        // Sort by year and month
-                        const sortedMonthYears = Object.keys(paymentsByMonth).sort((a, b) => {
-                            const [monthA, yearA] = a.split('-');
-                            const [monthB, yearB] = b.split('-');
-                            if (yearA !== yearB) return yearA - yearB;
-                            return monthA - monthB;
-                        });
-                        
-                        // Create table rows
-                        sortedMonthYears.forEach(monthYear => {
-                            const payment = paymentsByMonth[monthYear];
-                            const row = document.createElement('tr');
-                            row.className = payment.paid ? 'bg-green-50' : 'bg-red-50';
-                            
-                            const monthCell = document.createElement('td');
-                            monthCell.className = 'py-3 px-4 border-b';
-                            monthCell.textContent = thaiMonths[payment.month - 1];
-                            
-                            const yearCell = document.createElement('td');
-                            yearCell.className = 'py-3 px-4 border-b';
-                            yearCell.textContent = parseInt(payment.year) + 543; // Convert to Buddhist era
-                            
-                            const statusCell = document.createElement('td');
-                            statusCell.className = 'py-3 px-4 border-b';
-                            
-                            const statusBadge = document.createElement('span');
-                            statusBadge.className = payment.paid ? 
-                                'px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800' : 
-                                'px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800';
-                            statusBadge.textContent = payment.paid ? 'ชำระแล้ว' : 'ยังไม่ชำระ';
-                            
-                            statusCell.appendChild(statusBadge);
-                            
-                            row.appendChild(monthCell);
-                            row.appendChild(yearCell);
-                            row.appendChild(statusCell);
-                            
-                            tableBody.appendChild(row);
-                        });
-                    } else {
+                    if (sortedMonthYears.length === 0) {
                         const row = document.createElement('tr');
                         const cell = document.createElement('td');
                         cell.colSpan = 3;
@@ -890,6 +865,40 @@
                         cell.textContent = 'ไม่พบข้อมูลการชำระเงิน';
                         row.appendChild(cell);
                         tableBody.appendChild(row);
+                    } else {
+                        sortedMonthYears.forEach(monthYear => {
+                            const [month, year] = monthYear.split('-');
+                            const payment = studentPayments[monthYear] || {
+                                month: parseInt(month),
+                                year: year,
+                                paid: false
+                            };
+                            const row = document.createElement('tr');
+                            row.className = payment.paid ? 'bg-green-50' : 'bg-red-50';
+
+                            const monthCell = document.createElement('td');
+                            monthCell.className = 'py-3 px-4 border-b';
+                            monthCell.textContent = thaiMonths[parseInt(month) - 1];
+
+                            const yearCell = document.createElement('td');
+                            yearCell.className = 'py-3 px-4 border-b';
+                            yearCell.textContent = parseInt(year) + 543;
+
+                            const statusCell = document.createElement('td');
+                            statusCell.className = 'py-3 px-4 border-b';
+                            const statusBadge = document.createElement('span');
+                            statusBadge.className = payment.paid ?
+                                'px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800' :
+                                'px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800';
+                            statusBadge.textContent = payment.paid ? 'ชำระแล้ว' : 'ยังไม่ชำระ';
+                            statusCell.appendChild(statusBadge);
+
+                            row.appendChild(monthCell);
+                            row.appendChild(yearCell);
+                            row.appendChild(statusCell);
+
+                            tableBody.appendChild(row);
+                        });
                     }
                     hideLoading();
                 })
