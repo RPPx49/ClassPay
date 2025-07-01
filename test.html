@@ -1,0 +1,1725 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบเก็บเงินในห้องเรียน</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Sarabun', sans-serif;
+        }
+        .toast {
+            visibility: hidden;
+            min-width: 250px;
+            margin-left: -125px;
+            background-color: #4CAF50;
+            color: white;
+            text-align: center;
+            border-radius: 8px;
+            padding: 16px;
+            position: fixed;
+            z-index: 1000;
+            left: 50%;
+            bottom: 30px;
+        }
+        .toast.show {
+            visibility: visible;
+            animation: fadein 0.5s, fadeout 0.5s 2.5s;
+        }
+        @keyframes fadein {
+            from {bottom: 0; opacity: 0;}
+            to {bottom: 30px; opacity: 1;}
+        }
+        @keyframes fadeout {
+            from {bottom: 30px; opacity: 1;}
+            to {bottom: 0; opacity: 0;}
+        }
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-radius: 50%;
+            border-top: 4px solid #3498db;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <!-- Toast Notification -->
+    <div id="toast" class="toast">
+        <span id="toastMessage"></span>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
+        <div class="bg-white p-5 rounded-lg flex flex-col items-center">
+            <div class="loader"></div>
+            <p class="mt-3 text-gray-700">กำลังดำเนินการ...</p>
+        </div>
+    </div>
+
+    <!-- Home Page -->
+    <div id="homePage" class="container mx-auto px-4 py-8">
+        <div class="max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden md:max-w-2xl">
+            <div class="p-8">
+                <div class="flex justify-center mb-6">
+                    <svg class="w-16 h-16 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838l-2.727 1.17 1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762zM9.3 16.573A9.026 9.026 0 007 14.935v-3.957l1.818.78a3 3 0 002.364 0l5.508-2.361a11.026 11.026 0 01.25 3.762 1 1 0 01-.89.89 8.968 8.968 0 00-5.35 2.524 1 1 0 01-1.4 0zM6 18a1 1 0 001-1v-2.065a8.935 8.935 0 00-2-.712V17a1 1 0 001 1z"></path>
+                    </svg>
+                </div>
+                <h1 class="text-2xl font-bold text-center text-gray-800 mb-4">ระบบเก็บเงินในห้องเรียน</h1>
+                <p class="text-gray-600 text-center mb-8">ระบบจัดการการเงินสำหรับห้องเรียน ช่วยให้การเก็บเงินและติดตามการชำระเงินเป็นไปอย่างมีประสิทธิภาพ</p>
+                <div class="flex flex-col space-y-4">
+                    <button onclick="showPage('loginPage')" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition duration-300 flex items-center justify-center">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path>
+                        </svg>
+                        เข้าสู่ระบบ
+                    </button>
+                    <button onclick="showPage('registerPage')" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg transition duration-300 flex items-center justify-center">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
+                        </svg>
+                        สมัครสมาชิก
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Login Page -->
+    <div id="loginPage" class="container mx-auto px-4 py-8 hidden">
+        <div class="max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden">
+            <div class="p-8">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold text-gray-800">เข้าสู่ระบบ</h2>
+                    <button onclick="showPage('homePage')" class="text-gray-500 hover:text-gray-700">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+                <form id="loginForm" class="space-y-6">
+                    <div>
+                        <label for="loginStudentId" class="block text-sm font-medium text-gray-700 mb-1">รหัสนักศึกษา</label>
+                        <input type="text" id="loginStudentId" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="กรอกรหัสนักศึกษา" required>
+                    </div>
+                    <div>
+                        <label for="loginPassword" class="block text-sm font-medium text-gray-700 mb-1">รหัสผ่าน</label>
+                        <input type="password" id="loginPassword" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="กรอกรหัสผ่าน" required>
+                    </div>
+                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md transition duration-300">เข้าสู่ระบบ</button>
+                </form>
+                <div class="mt-4 text-center">
+                    <p class="text-sm text-gray-600">ยังไม่มีบัญชี? <a href="#" onclick="showPage('registerPage')" class="text-blue-600 hover:text-blue-800 font-medium">สมัครสมาชิก</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Register Page -->
+    <div id="registerPage" class="container mx-auto px-4 py-8 hidden">
+        <div class="max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden">
+            <div class="p-8">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold text-gray-800">สมัครสมาชิก</h2>
+                    <button onclick="showPage('homePage')" class="text-gray-500 hover:text-gray-700">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                    </button>
+                </div>
+                <form id="registerForm" class="space-y-4">
+                    <div>
+                        <label for="registerStudentId" class="block text-sm font-medium text-gray-700 mb-1">รหัสนักศึกษา</label>
+                        <input type="text" id="registerStudentId" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="กรอกรหัสนักศึกษา (6741440xxxx)" required>
+                        <p class="text-xs text-gray-500 mt-1">รหัสนักศึกษาต้องขึ้นต้นด้วย 6741440 ตามด้วยเลข 4 หลัก</p>
+                    </div>
+                    <div>
+                        <label for="registerName" class="block text-sm font-medium text-gray-700 mb-1">ชื่อ-นามสกุล</label>
+                        <input type="text" id="registerName" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="กรอกชื่อ-นามสกุล" required>
+                    </div>
+                    <div>
+                        <label for="registerPassword" class="block text-sm font-medium text-gray-700 mb-1">รหัสผ่าน</label>
+                        <input type="password" id="registerPassword" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="กรอกรหัสผ่าน" required>
+                    </div>
+                    <div>
+                        <label for="registerConfirmPassword" class="block text-sm font-medium text-gray-700 mb-1">ยืนยันรหัสผ่าน</label>
+                        <input type="password" id="registerConfirmPassword" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="กรอกรหัสผ่านอีกครั้ง" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">บทบาท</label>
+                        <div class="flex space-x-4">
+                            <div class="flex items-center">
+                                <input type="radio" id="roleMember" name="role" value="member" class="h-4 w-4 text-blue-600 focus:ring-blue-500" checked>
+                                <label for="roleMember" class="ml-2 block text-sm text-gray-700">สมาชิก</label>
+                            </div>
+                            <div class="flex items-center">
+                                <input type="radio" id="roleAdmin" name="role" value="admin" class="h-4 w-4 text-blue-600 focus:ring-blue-500">
+                                <label for="roleAdmin" class="ml-2 block text-sm text-gray-700">เหรัญญิก</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="adminCodeContainer" class="hidden">
+                        <label for="adminCode" class="block text-sm font-medium text-gray-700 mb-1">รหัสยืนยันเหรัญญิก</label>
+                        <input type="text" id="adminCode" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="กรอกรหัสยืนยัน">
+                    </div>
+                    <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-md transition duration-300">สมัครสมาชิก</button>
+                </form>
+                <div class="mt-4 text-center">
+                    <p class="text-sm text-gray-600">มีบัญชีอยู่แล้ว? <a href="#" onclick="showPage('loginPage')" class="text-blue-600 hover:text-blue-800 font-medium">เข้าสู่ระบบ</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Student Dashboard -->
+    <div id="studentDashboard" class="container mx-auto px-4 py-8 hidden">
+        <div class="max-w-4xl mx-auto">
+            <div class="bg-white rounded-xl shadow-md overflow-hidden mb-6">
+                <div class="p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-2xl font-bold text-gray-800">ข้อมูลการชำระเงิน</h2>
+                        <div class="flex items-center">
+                            <span id="studentName" class="mr-4 text-gray-600"></span>
+                            <button onclick="logout()" class="bg-red-500 hover:bg-red-600 text-white font-medium py-2 px-4 rounded-md transition duration-300 flex items-center">
+                                <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                                </svg>
+                                ออกจากระบบ
+                            </button>
+                        </div>
+                    </div>
+                    <div class="mb-6">
+                        <div class="flex items-center mb-2">
+                            <svg class="w-5 h-5 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                            </svg>
+                            <p class="text-gray-700">รหัสนักศึกษา: <span id="studentIdDisplay" class="font-medium"></span></p>
+                        </div>
+                        <div class="flex items-center">
+                            <svg class="w-5 h-5 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                            </svg>
+                            <p class="text-gray-700">ห้อง: <span id="studentClassDisplay" class="font-medium"></span></p>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full bg-white border border-gray-200">
+                            <thead>
+                                <tr>
+                                    <th class="py-3 px-4 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">เดือน</th>
+                                    <th class="py-3 px-4 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">ปี</th>
+                                    <th class="py-3 px-4 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">สถานะ</th>
+                                </tr>
+                            </thead>
+                            <tbody id="studentPaymentTable">
+                                <!-- Payment data will be populated here -->
+                                <tr>
+                                    <td colspan="3" class="py-4 px-4 text-center text-gray-500">กำลังโหลดข้อมูล...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Dashboard -->
+    <div id="adminDashboard" class="container mx-auto px-4 py-8 hidden">
+        <div class="max-w-7xl mx-auto">
+            <div class="bg-white rounded-xl shadow-md overflow-hidden mb-6">
+                <div class="p-6">
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-4 md:mb-0">แดชบอร์ดเหรัญญิก</h2>
+                        <div class="flex flex-col md:flex-row items-start md:items-center space-y-2 md:space-y-0 md:space-x-4">
+                            <span id="adminName" class="text-gray-600 mb-2 md:mb-0"></span>
+                            <button onclick="logout()" class="bg-red-500 hover:bg-red-600 text-white font-medium py-2 px-4 rounded-md transition duration-300 flex items-center">
+                                <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                                </svg>
+                                ออกจากระบบ
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Admin Tabs -->
+                    <div class="mb-6">
+                        <div class="border-b border-gray-200">
+                            <nav class="-mb-px flex space-x-8">
+                                <button onclick="switchAdminTab('payments')" id="paymentsTabBtn" class="border-b-2 border-blue-500 py-4 px-1 text-sm font-medium text-blue-600">
+                                    จัดการการชำระเงิน
+                                </button>
+                                <button onclick="switchAdminTab('activities')" id="activitiesTabBtn" class="border-b-2 border-transparent py-4 px-1 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300">
+                                    กิจกรรมการเงิน
+                                </button>
+                            </nav>
+                        </div>
+                    </div>
+
+                    <!-- Payments Tab Content -->
+                    <div id="paymentsTab" class="admin-tab">
+                        <div class="mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="bg-blue-50 p-4 rounded-lg">
+                                <h3 class="text-lg font-semibold text-blue-800 mb-2">ยอดเงินห้อง 1</h3>
+                                <p class="text-2xl font-bold text-blue-600" id="class1Balance">0 บาท</p>
+                            </div>
+                            <div class="bg-green-50 p-4 rounded-lg">
+                                <h3 class="text-lg font-semibold text-green-800 mb-2">ยอดเงินห้อง 2</h3>
+                                <p class="text-2xl font-bold text-green-600" id="class2Balance">0 บาท</p>
+                            </div>
+                            <div class="bg-purple-50 p-4 rounded-lg">
+                                <h3 class="text-lg font-semibold text-purple-800 mb-2">เงินกองกลาง</h3>
+                                <div class="flex items-center">
+                                    <p class="text-2xl font-bold text-purple-600" id="centralFundBalance">0 บาท</p>
+                                    <button onclick="editCentralFund()" class="ml-2 text-purple-600 hover:text-purple-800">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-6 flex flex-col md:flex-row justify-between items-start md:items-center space-y-4 md:space-y-0">
+                            <div class="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4">
+                                <div>
+                                    <label for="monthSelect" class="block text-sm font-medium text-gray-700 mb-1">เดือน</label>
+                                    <select id="monthSelect" class="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                        <option value="1">มกราคม</option>
+                                        <option value="2">กุมภาพันธ์</option>
+                                        <option value="3">มีนาคม</option>
+                                        <option value="4">เมษายน</option>
+                                        <option value="5">พฤษภาคม</option>
+                                        <option value="6">มิถุนายน</option>
+                                        <option value="7">กรกฎาคม</option>
+                                        <option value="8">สิงหาคม</option>
+                                        <option value="9">กันยายน</option>
+                                        <option value="10">ตุลาคม</option>
+                                        <option value="11">พฤศจิกายน</option>
+                                        <option value="12">ธันวาคม</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label for="yearSelect" class="block text-sm font-medium text-gray-700 mb-1">ปี</label>
+                                    <select id="yearSelect" class="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                        <option value="2023">2566</option>
+                                        <option value="2024" selected>2567</option>
+                                        <option value="2025">2568</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label for="classFilter" class="block text-sm font-medium text-gray-700 mb-1">ห้อง</label>
+                                    <select id="classFilter" class="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                        <option value="all">ทั้งหมด</option>
+                                        <option value="1">ห้อง 1</option>
+                                        <option value="2">ห้อง 2</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="flex space-x-2">
+                                <button onclick="addNewMonth()" class="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-md transition duration-300 flex items-center">
+                                    <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                                    </svg>
+                                    เพิ่มเดือนใหม่
+                                </button>
+                                <button onclick="showAddStudentModal()" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition duration-300 flex items-center">
+                                    <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
+                                    </svg>
+                                    เพิ่มนักเรียน
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full bg-white border border-gray-200">
+                                <thead>
+                                    <tr id="adminPaymentTableHeader">
+                                        <th class="py-3 px-4 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">รหัสนักศึกษา</th>
+                                        <th class="py-3 px-4 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">ชื่อ-นามสกุล</th>
+                                        <th class="py-3 px-4 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">ห้อง</th>
+                                        <!-- ส่วนนี้จะถูกเติมโดย JS -->
+                                    </tr>
+                                </thead>
+                                <tbody id="adminPaymentTable">
+                                    <!-- Payment data will be populated here -->
+                                    <tr>
+                                        <td colspan="5" class="py-4 px-4 text-center text-gray-500">กำลังโหลดข้อมูล...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- เพิ่มในส่วน Admin Dashboard ใต้ตารางการชำระเงิน หรือหลังปุ่ม "เพิ่มนักเรียน" -->
+                        <div class="mt-10">
+                            <h3 class="text-lg font-bold text-gray-800 mb-4">จัดการข้อมูลสมาชิก</h3>
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full bg-white border border-gray-200">
+                                    <thead>
+                                        <tr>
+                                            <th class="py-3 px-4 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase border-b">รหัสนักศึกษา</th>
+                                            <th class="py-3 px-4 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase border-b">ชื่อ-นามสกุล</th>
+                                            <th class="py-3 px-4 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase border-b">ห้อง</th>
+                                            <th class="py-3 px-4 bg-gray-50 text-center text-xs font-medium text-gray-500 uppercase border-b">การจัดการ</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="memberManageTable">
+                                        <tr>
+                                            <td colspan="4" class="py-4 px-4 text-center text-gray-500">กำลังโหลดข้อมูล...</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Activities Tab Content -->
+                    <div id="activitiesTab" class="admin-tab hidden">
+                        <div class="mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="bg-blue-50 p-4 rounded-lg">
+                                <h3 class="text-lg font-semibold text-blue-800 mb-2">ยอดเงินห้อง 1</h3>
+                                <p class="text-2xl font-bold text-blue-600" id="class1BalanceAct">0 บาท</p>
+                            </div>
+                            <div class="bg-green-50 p-4 rounded-lg">
+                                <h3 class="text-lg font-semibold text-green-800 mb-2">ยอดเงินห้อง 2</h3>
+                                <p class="text-2xl font-bold text-green-600" id="class2BalanceAct">0 บาท</p>
+                            </div>
+                            <div class="bg-purple-50 p-4 rounded-lg">
+                                <h3 class="text-lg font-semibold text-purple-800 mb-2">เงินกองกลาง</h3>
+                                <p class="text-2xl font-bold text-purple-600" id="centralFundBalanceAct">0 บาท</p>
+                            </div>
+                        </div>
+
+                        <div class="mb-6">
+                            <button onclick="showAddActivityModal()" class="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-md transition duration-300 flex items-center">
+                                <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                                </svg>
+                                เพิ่มกิจกรรมการเงิน
+                            </button>
+                        </div>
+
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full bg-white border border-gray-200">
+                                <thead>
+                                    <tr>
+                                        <th class="py-3 px-4 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">วันที่</th>
+                                        <th class="py-3 px-4 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">รายการ</th>
+                                        <th class="py-3 px-4 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">แหล่งเงิน</th>
+                                        <th class="py-3 px-4 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">จำนวนเงิน</th>
+                                        <th class="py-3 px-4 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">ประเภท</th>
+                                        <th class="py-3 px-4 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">การจัดการ</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="activitiesTable">
+                                    <!-- Activities data will be populated here -->
+                                    <tr>
+                                        <td colspan="6" class="py-4 px-4 text-center text-gray-500">กำลังโหลดข้อมูล...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Student Modal -->
+    <div id="addStudentModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
+        <div class="bg-white p-6 rounded-lg max-w-md w-full">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-bold text-gray-800">เพิ่มนักเรียน</h3>
+                <button onclick="closeAddStudentModal()" class="text-gray-500 hover:text-gray-700">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            <form id="addStudentForm" class="space-y-4">
+                <div>
+                    <label for="newStudentId" class="block text-sm font-medium text-gray-700 mb-1">รหัสนักศึกษา</label>
+                    <input type="text" id="newStudentId" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="กรอกรหัสนักศึกษา (6741440xxxx)" required>
+                </div>
+                <div>
+                    <label for="newStudentName" class="block text-sm font-medium text-gray-700 mb-1">ชื่อ-นามสกุล</label>
+                    <input type="text" id="newStudentName" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="กรอกชื่อ-นามสกุล" required>
+                </div>
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md transition duration-300">เพิ่มนักเรียน</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Activity Modal -->
+    <div id="addActivityModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
+        <div class="bg-white p-6 rounded-lg max-w-md w-full">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-bold text-gray-800">เพิ่มกิจกรรมการเงิน</h3>
+                <button onclick="closeAddActivityModal()" class="text-gray-500 hover:text-gray-700">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            <form id="addActivityForm" class="space-y-4">
+                <div>
+                    <label for="activityDate" class="block text-sm font-medium text-gray-700 mb-1">วันที่</label>
+                    <input type="date" id="activityDate" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                </div>
+                <div>
+                    <label for="activityDescription" class="block text-sm font-medium text-gray-700 mb-1">รายการ</label>
+                    <input type="text" id="activityDescription" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="กรอกรายละเอียดกิจกรรม" required>
+                </div>
+                <div>
+                    <label for="activitySource" class="block text-sm font-medium text-gray-700 mb-1">แหล่งเงิน</label>
+                    <select id="activitySource" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                        <option value="class1">ห้อง 1</option>
+                        <option value="class2">ห้อง 2</option>
+                        <option value="central">กองกลาง</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="activityAmount" class="block text-sm font-medium text-gray-700 mb-1">จำนวนเงิน (บาท)</label>
+                    <input type="number" id="activityAmount" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="กรอกจำนวนเงิน" required>
+                </div>
+                <div>
+                    <label for="activityType" class="block text-sm font-medium text-gray-700 mb-1">ประเภท</label>
+                    <select id="activityType" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                        <option value="expense">รายจ่าย</option>
+                        <option value="income">รายรับ</option>
+                    </select>
+                </div>
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md transition duration-300">บันทึกกิจกรรม</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Central Fund Modal -->
+    <div id="editCentralFundModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
+        <div class="bg-white p-6 rounded-lg max-w-md w-full">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-bold text-gray-800">แก้ไขเงินกองกลาง</h3>
+                <button onclick="closeEditCentralFundModal()" class="text-gray-500 hover:text-gray-700">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            <form id="editCentralFundForm" class="space-y-4">
+                <div>
+                    <label for="centralFundAmount" class="block text-sm font-medium text-gray-700 mb-1">จำนวนเงินกองกลาง (บาท)</label>
+                    <input type="number" id="centralFundAmount" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="กรอกจำนวนเงิน" required>
+                </div>
+                <button type="submit" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-md transition duration-300">บันทึกการเปลี่ยนแปลง</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Activity Modal -->
+    <div id="editActivityModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
+        <div class="bg-white p-6 rounded-lg max-w-md w-full">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-bold text-gray-800">แก้ไขกิจกรรมการเงิน</h3>
+                <button onclick="closeEditActivityModal()" class="text-gray-500 hover:text-gray-700">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            <form id="editActivityForm" class="space-y-4">
+                <input type="hidden" id="editActivityId">
+                <div>
+                    <label for="editActivityDate" class="block text-sm font-medium text-gray-700 mb-1">วันที่</label>
+                    <input type="date" id="editActivityDate" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                </div>
+                <div>
+                    <label for="editActivityDescription" class="block text-sm font-medium text-gray-700 mb-1">รายการ</label>
+                    <input type="text" id="editActivityDescription" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="กรอกรายละเอียดกิจกรรม" required>
+                </div>
+                <div>
+                    <label for="editActivitySource" class="block text-sm font-medium text-gray-700 mb-1">แหล่งเงิน</label>
+                    <select id="editActivitySource" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                        <option value="class1">ห้อง 1</option>
+                        <option value="class2">ห้อง 2</option>
+                        <option value="central">กองกลาง</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="editActivityAmount" class="block text-sm font-medium text-gray-700 mb-1">จำนวนเงิน (บาท)</label>
+                    <input type="number" id="editActivityAmount" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="กรอกจำนวนเงิน" required>
+                </div>
+                <div>
+                    <label for="editActivityType" class="block text-sm font-medium text-gray-700 mb-1">ประเภท</label>
+                    <select id="editActivityType" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                        <option value="expense">รายจ่าย</option>
+                        <option value="income">รายรับ</option>
+                    </select>
+                </div>
+                <div class="flex space-x-2">
+                    <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md transition duration-300">บันทึกการเปลี่ยนแปลง</button>
+                    <button type="button" onclick="deleteActivity()" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-md transition duration-300">ลบกิจกรรม</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyAynXhZM9r3S5C9zlBIMXuurP1l7HTLZGM",
+            authDomain: "classv2-2efa6.firebaseapp.com",
+            databaseURL: "https://classv2-2efa6-default-rtdb.firebaseio.com",
+            projectId: "classv2-2efa6",
+            storageBucket: "classv2-2efa6.firebasestorage.app",
+            messagingSenderId: "944901218582",
+            appId: "1:944901218582:web:4ff433cd8a60464deaf037",
+            measurementId: "G-KLW6F1HYLY"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const database = firebase.database();
+
+        // Global variables
+        let currentUser = null;
+        let currentUserData = null;
+        let currentActivityId = null;
+        const ADMIN_CODE = "RPPx49";
+        const thaiMonths = [
+            "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", 
+            "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"
+        ];
+
+        // เพิ่ม array เดือนแบบย่อ
+        const thaiMonthsShort = [
+            "ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.",
+            "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."
+        ];
+
+        // Show loading overlay
+        function showLoading() {
+            document.getElementById('loadingOverlay').classList.remove('hidden');
+        }
+
+        // Hide loading overlay
+        function hideLoading() {
+            document.getElementById('loadingOverlay').classList.add('hidden');
+        }
+
+        // Show toast notification
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toastMessage');
+            toastMessage.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // Show/hide pages
+        function showPage(pageId) {
+            // Hide all pages
+            document.querySelectorAll('#homePage, #loginPage, #registerPage, #studentDashboard, #adminDashboard').forEach(page => {
+                page.classList.add('hidden');
+            });
+            // Show the requested page
+            document.getElementById(pageId).classList.remove('hidden');
+            if (pageId === 'adminDashboard') {
+                loadMemberManageTable();
+            }
+        }
+
+        // Switch between admin tabs
+        function switchAdminTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.admin-tab').forEach(tab => {
+                tab.classList.add('hidden');
+            });
+            // Reset all tab buttons
+            document.querySelectorAll('#paymentsTabBtn, #activitiesTabBtn').forEach(btn => {
+                btn.classList.remove('border-blue-500', 'text-blue-600');
+                btn.classList.add('border-transparent', 'text-gray-500');
+            });
+            
+            // Show the selected tab
+            document.getElementById(`${tabName}Tab`).classList.remove('hidden');
+            // Highlight the selected tab button
+            document.getElementById(`${tabName}TabBtn`).classList.remove('border-transparent', 'text-gray-500');
+            document.getElementById(`${tabName}TabBtn`).classList.add('border-blue-500', 'text-blue-600');
+            
+            // Load data for the selected tab
+            if (tabName === 'payments') {
+                loadPaymentData();
+            } else if (tabName === 'activities') {
+                loadActivitiesData();
+            }
+        }
+
+        // Toggle admin code input visibility based on role selection
+        document.addEventListener('DOMContentLoaded', function() {
+            const roleInputs = document.querySelectorAll('input[name="role"]');
+            roleInputs.forEach(input => {
+                input.addEventListener('change', function() {
+                    const adminCodeContainer = document.getElementById('adminCodeContainer');
+                    if (this.value === 'admin') {
+                        adminCodeContainer.classList.remove('hidden');
+                    } else {
+                        adminCodeContainer.classList.add('hidden');
+                    }
+                });
+            });
+
+            // Set up form submission handlers
+            document.getElementById('registerForm').addEventListener('submit', handleRegister);
+            document.getElementById('loginForm').addEventListener('submit', handleLogin);
+            document.getElementById('addStudentForm').addEventListener('submit', handleAddStudent);
+            document.getElementById('addActivityForm').addEventListener('submit', handleAddActivity);
+            document.getElementById('editCentralFundForm').addEventListener('submit', handleEditCentralFund);
+            document.getElementById('editActivityForm').addEventListener('submit', handleEditActivity);
+
+            // Check if user is already logged in
+            auth.onAuthStateChanged(user => {
+                if (user) {
+                    currentUser = user;
+                    getUserData(user.uid);
+                } else {
+                    showPage('homePage');
+                }
+            });
+        });
+
+        // Handle user registration
+        function handleRegister(e) {
+            e.preventDefault();
+            showLoading();
+
+            const studentId = document.getElementById('registerStudentId').value;
+            const name = document.getElementById('registerName').value;
+            const password = document.getElementById('registerPassword').value;
+            const confirmPassword = document.getElementById('registerConfirmPassword').value;
+            const role = document.querySelector('input[name="role"]:checked').value;
+            const adminCode = document.getElementById('adminCode').value;
+
+            // Validate student ID format
+            if (!studentId.match(/^6741440\d{4}$/)) {
+                hideLoading();
+                showToast('รหัสนักศึกษาไม่ถูกต้อง ต้องขึ้นต้นด้วย 6741440 ตามด้วยเลข 4 หลัก');
+                return;
+            }
+
+            // Check if passwords match
+            if (password !== confirmPassword) {
+                hideLoading();
+                showToast('รหัสผ่านไม่ตรงกัน');
+                return;
+            }
+
+            // Check admin code if role is admin
+            if (role === 'admin' && adminCode !== ADMIN_CODE) {
+                hideLoading();
+                showToast('รหัสยืนยันเหรัญญิกไม่ถูกต้อง');
+                return;
+            }
+
+            // Determine class based on student ID
+            const classNumber = studentId.charAt(8) === '1' ? 1 : 2;
+
+            // Create user with email and password
+            const email = `${studentId}@classroom.com`;
+            auth.createUserWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    // Save additional user data to database
+                    const user = userCredential.user;
+                    const userData = {
+                        studentId: studentId,
+                        name: name,
+                        role: role,
+                        class: classNumber,
+                        createdAt: firebase.database.ServerValue.TIMESTAMP
+                    };
+
+                    return database.ref('users/' + user.uid).set(userData);
+                })
+                .then(() => {
+                    hideLoading();
+                    showToast('สมัครสมาชิกสำเร็จ');
+                    // Form will be reset automatically when page changes
+                })
+                .catch((error) => {
+                    hideLoading();
+                    console.error("Registration error:", error);
+                    showToast(`เกิดข้อผิดพลาด: ${error.message}`);
+                });
+        }
+
+        // Handle user login
+        function handleLogin(e) {
+            e.preventDefault();
+            showLoading();
+
+            const studentId = document.getElementById('loginStudentId').value;
+            const password = document.getElementById('loginPassword').value;
+            const email = `${studentId}@classroom.com`;
+
+            auth.signInWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    // Login successful
+                    const user = userCredential.user;
+                    currentUser = user;
+                    return getUserData(user.uid);
+                })
+                .catch((error) => {
+                    hideLoading();
+                    console.error("Login error:", error);
+                    showToast('รหัสนักศึกษาหรือรหัสผ่านไม่ถูกต้อง');
+                });
+        }
+
+        // Get user data from database
+        function getUserData(userId) {
+            database.ref('users/' + userId).once('value')
+                .then((snapshot) => {
+                    const userData = snapshot.val();
+                    if (userData) {
+                        currentUserData = userData;
+                        
+                        // Redirect to appropriate dashboard based on role
+                        if (userData.role === 'admin') {
+                            document.getElementById('adminName').textContent = userData.name;
+                            showPage('adminDashboard');
+                            loadBalanceData();
+                            loadPaymentData();
+                        } else {
+                            document.getElementById('studentName').textContent = userData.name;
+                            document.getElementById('studentIdDisplay').textContent = userData.studentId;
+                            document.getElementById('studentClassDisplay').textContent = userData.class;
+                            showPage('studentDashboard');
+                            loadStudentPaymentData(userData.studentId);
+                        }
+                    } else {
+                        showToast('ไม่พบข้อมูลผู้ใช้');
+                        auth.signOut();
+                    }
+                    hideLoading();
+                })
+                .catch((error) => {
+                    hideLoading();
+                    console.error("Error getting user data:", error);
+                    showToast(`เกิดข้อผิดพลาด: ${error.message}`);
+                });
+        }
+
+        // Load student payment data
+        function loadStudentPaymentData(studentId) {
+            showLoading();
+            database.ref('payments').orderByChild('studentId').equalTo(studentId).once('value')
+                .then((snapshot) => {
+                    const tableBody = document.getElementById('studentPaymentTable');
+                    tableBody.innerHTML = '';
+                    
+                    if (snapshot.exists()) {
+                        const payments = snapshot.val();
+                        const paymentsByMonth = {};
+                        
+                        // Group payments by month and year
+                        Object.keys(payments).forEach(key => {
+                            const payment = payments[key];
+                            const monthYear = `${payment.month}-${payment.year}`;
+                            paymentsByMonth[monthYear] = payment;
+                        });
+                        
+                        // Sort by year and month
+                        const sortedMonthYears = Object.keys(paymentsByMonth).sort((a, b) => {
+                            const [monthA, yearA] = a.split('-');
+                            const [monthB, yearB] = b.split('-');
+                            if (yearA !== yearB) return yearA - yearB;
+                            return monthA - monthB;
+                        });
+                        
+                        // Create table rows
+                        sortedMonthYears.forEach(monthYear => {
+                            const payment = paymentsByMonth[monthYear];
+                            const row = document.createElement('tr');
+                            row.className = payment.paid ? 'bg-green-50' : 'bg-red-50';
+                            
+                            const monthCell = document.createElement('td');
+                            monthCell.className = 'py-3 px-4 border-b';
+                            monthCell.textContent = thaiMonths[payment.month - 1];
+                            
+                            const yearCell = document.createElement('td');
+                            yearCell.className = 'py-3 px-4 border-b';
+                            yearCell.textContent = parseInt(payment.year) + 543; // Convert to Buddhist era
+                            
+                            const statusCell = document.createElement('td');
+                            statusCell.className = 'py-3 px-4 border-b';
+                            
+                            const statusBadge = document.createElement('span');
+                            statusBadge.className = payment.paid ? 
+                                'px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800' : 
+                                'px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800';
+                            statusBadge.textContent = payment.paid ? 'ชำระแล้ว' : 'ยังไม่ชำระ';
+                            
+                            statusCell.appendChild(statusBadge);
+                            
+                            row.appendChild(monthCell);
+                            row.appendChild(yearCell);
+                            row.appendChild(statusCell);
+                            
+                            tableBody.appendChild(row);
+                        });
+                    } else {
+                        const row = document.createElement('tr');
+                        const cell = document.createElement('td');
+                        cell.colSpan = 3;
+                        cell.className = 'py-4 px-4 text-center text-gray-500';
+                        cell.textContent = 'ไม่พบข้อมูลการชำระเงิน';
+                        row.appendChild(cell);
+                        tableBody.appendChild(row);
+                    }
+                    hideLoading();
+                })
+                .catch((error) => {
+                    hideLoading();
+                    console.error("Error loading student payment data:", error);
+                    showToast(`เกิดข้อผิดพลาด: ${error.message}`);
+                });
+        }
+
+        // Load balance data for admin dashboard
+        function loadBalanceData() {
+            database.ref('balances').once('value')
+                .then((snapshot) => {
+                    const balances = snapshot.val() || { class1: 0, class2: 0, central: 0 };
+                    
+                    // Update balances in payments tab
+                    document.getElementById('class1Balance').textContent = `${balances.class1.toLocaleString()} บาท`;
+                    document.getElementById('class2Balance').textContent = `${balances.class2.toLocaleString()} บาท`;
+                    document.getElementById('centralFundBalance').textContent = `${balances.central.toLocaleString()} บาท`;
+                    
+                    // Update balances in activities tab
+                    document.getElementById('class1BalanceAct').textContent = `${balances.class1.toLocaleString()} บาท`;
+                    document.getElementById('class2BalanceAct').textContent = `${balances.class2.toLocaleString()} บาท`;
+                    document.getElementById('centralFundBalanceAct').textContent = `${balances.central.toLocaleString()} บาท`;
+                })
+                .catch((error) => {
+                    console.error("Error loading balance data:", error);
+                    showToast(`เกิดข้อผิดพลาด: ${error.message}`);
+                });
+        }
+
+        // Load payment data for admin dashboard
+        function loadPaymentData() {
+            showLoading();
+            const year = document.getElementById('yearSelect').value;
+            const classFilter = document.getElementById('classFilter').value;
+
+            // ดึง users ทั้งหมด
+            database.ref('users').orderByChild('role').equalTo('member').once('value')
+                .then((usersSnapshot) => {
+                    const users = usersSnapshot.val() || {};
+                    const usersList = [];
+                    Object.keys(users).forEach(userId => {
+                        const user = users[userId];
+                        user.id = userId;
+                        if (classFilter === 'all' || user.class.toString() === classFilter) {
+                            usersList.push(user);
+                        }
+                    });
+                    usersList.sort((a, b) => a.studentId.localeCompare(b.studentId));
+
+                    // ดึง payments ทั้งหมดของปีที่เลือก
+                    return database.ref('payments').once('value')
+                            .then((paymentsSnapshot) => {
+                                const payments = paymentsSnapshot.val() || {};
+
+                                // --- ดึงเดือน-ปีที่มีในฐานข้อมูลทั้งหมด ---
+                                const monthYearSet = new Set();
+                                Object.values(payments).forEach(payment => {
+                                    if (payment.month && payment.year) {
+                                        monthYearSet.add(`${parseInt(payment.month)}-${payment.year}`);
+                                    }
+                                });
+                                // เรียงเดือน-ปี
+                                const sortedMonthYears = Array.from(monthYearSet).sort((a, b) => {
+                                    const [mA, yA] = a.split('-').map(Number);
+                                    const [mB, yB] = b.split('-').map(Number);
+                                    return yA !== yB ? yA - yB : mA - mB;
+                                });
+
+                                // สร้าง header
+                                const headerRow = document.getElementById('adminPaymentTableHeader');
+                                while (headerRow.children.length > 3) headerRow.removeChild(headerRow.lastChild);
+                                sortedMonthYears.forEach(my => {
+                                    const [m, y] = my.split('-');
+                                    const th = document.createElement('th');
+                                    th.className = "py-3 px-4 bg-gray-50 text-center text-xs font-medium text-gray-500 uppercase tracking-wider border-b";
+                                    th.innerHTML = `${thaiMonthsShort[m-1]} ${parseInt(y) + 543}<br>
+                                        <button onclick="deleteMonth(${m}, '${y}')" class="text-red-500 hover:text-red-700 text-xs underline">ลบ</button>`;
+                                    headerRow.appendChild(th);
+                                });
+
+                                // สร้างข้อมูลแต่ละแถว
+                                const tableBody = document.getElementById('adminPaymentTable');
+                                tableBody.innerHTML = '';
+                                if (usersList.length === 0) {
+                                    const row = document.createElement('tr');
+                                    const cell = document.createElement('td');
+                                    cell.colSpan = 3 + sortedMonthYears.length;
+                                    cell.className = 'py-4 px-4 text-center text-gray-500';
+                                    cell.textContent = 'ไม่พบข้อมูลนักเรียน';
+                                    row.appendChild(cell);
+                                    tableBody.appendChild(row);
+                                } else {
+                                    usersList.forEach(user => {
+                                        const row = document.createElement('tr');
+                                        // รหัสนักศึกษา
+                                        const idCell = document.createElement('td');
+                                        idCell.className = 'py-3 px-4 border-b';
+                                        idCell.textContent = user.studentId;
+                                        row.appendChild(idCell);
+
+                                        // ชื่อ-นามสกุล (ไม่ย่อ)
+                                        const nameCell = document.createElement('td');
+                                        nameCell.className = 'py-3 px-4 border-b w-[160px] whitespace-normal break-words'; // เพิ่ม max-w-[180px]
+                                        nameCell.textContent = user.name;
+                                        row.appendChild(nameCell);
+
+                                        // ห้อง
+                                        const classCell = document.createElement('td');
+                                        classCell.className = 'py-3 px-4 border-b';
+                                        classCell.textContent = user.class;
+                                        row.appendChild(classCell);
+
+                                        // สถานะแต่ละเดือน-ปี
+                                        sortedMonthYears.forEach(my => {
+                                            const [m, y] = my.split('-');
+                                            let userPayment = null;
+                                            Object.keys(payments).forEach(key => {
+                                                if (
+                                                    payments[key].studentId === user.studentId &&
+                                                    parseInt(payments[key].month) === parseInt(m) &&
+                                                    (payments[key].year == y || parseInt(payments[key].year) === parseInt(y))
+                                                ) {
+                                                    userPayment = payments[key];
+                                                    userPayment.id = key;
+                                                }
+                                            });
+                                            if (!userPayment) {
+                                                userPayment = {
+                                                    studentId: user.studentId,
+                                                    month: parseInt(m),
+                                                    year: y,
+                                                    paid: false,
+                                                    monthYear: `${m}-${y}`
+                                                };
+                                            }
+                                            const statusCell = document.createElement('td');
+                                            statusCell.className = 'py-3 px-4 border-b text-center';
+                                            statusCell.title = thaiMonths[parseInt(m) - 1] + ' ' + (parseInt(y) + 543);
+
+                                            // ย่อเดือนใน cell
+                                            const monthShortSpan = document.createElement('span');
+                                            monthShortSpan.className = 'block text-xs text-gray-400 mb-1';
+                                            monthShortSpan.textContent = thaiMonthsShort[parseInt(m) - 1];
+                                            statusCell.appendChild(monthShortSpan);
+
+                                            const statusBadge = document.createElement('span');
+                                            statusBadge.className = userPayment.paid ?
+                                                'px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800' :
+                                                'px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800';
+                                            statusBadge.textContent = userPayment.paid ? '✓' : '✗';
+
+                                            // ปุ่ม toggle
+                                            const toggleButton = document.createElement('button');
+                                            toggleButton.className = userPayment.paid ?
+                                                'ml-2 bg-red-500 hover:bg-red-600 text-white text-xs py-1 px-2 rounded' :
+                                                'ml-2 bg-green-500 hover:bg-green-600 text-white text-xs py-1 px-2 rounded';
+                                            toggleButton.textContent = userPayment.paid ? 'ยกเลิก' : 'ชำระ';
+                                            toggleButton.onclick = () => togglePaymentStatus(user.studentId, parseInt(m), y, !userPayment.paid, user.class);
+
+                                            statusCell.appendChild(statusBadge);
+                                            statusCell.appendChild(toggleButton);
+
+                                            row.appendChild(statusCell);
+                                        });
+
+                                        tableBody.appendChild(row);
+                                    });
+                                }
+                                hideLoading();
+                            });
+                })
+                .catch((error) => {
+                    hideLoading();
+                    showToast(`เกิดข้อผิดพลาด: ${error.message}`);
+                });
+        }
+
+        // ฟังก์ชันเพิ่มเดือนใหม่ (admin)
+        function addNewMonth() {
+            const month = document.getElementById('monthSelect').value;
+            const year = document.getElementById('yearSelect').value;
+            showLoading();
+            database.ref('users').orderByChild('role').equalTo('member').once('value')
+                .then((snapshot) => {
+                    const users = snapshot.val() || {};
+                    const batch = {};
+                    Object.keys(users).forEach(userId => {
+                        const user = users[userId];
+                        const paymentKey = database.ref('payments').push().key;
+                        batch[paymentKey] = {
+                            studentId: user.studentId,
+                            month: parseInt(month),
+                            year: year,
+                            paid: false,
+                            monthYear: `${month}-${year}`,
+                            timestamp: firebase.database.ServerValue.TIMESTAMP
+                        };
+                    });
+                    return database.ref('payments').update(batch);
+                })
+                .then(() => {
+                    hideLoading();
+                    showToast('เพิ่มเดือนใหม่สำเร็จ');
+                    loadPaymentData();
+                })
+                .catch((error) => {
+                    hideLoading();
+                    showToast(`เกิดข้อผิดพลาด: ${error.message}`);
+                });
+        }
+
+        function deleteMonth(month, year) {
+            if (!confirm(`ต้องการลบข้อมูลการชำระเงินของเดือน ${thaiMonths[month - 1]} ปี ${parseInt(year) + 543} หรือไม่?`)) return;
+            showLoading();
+            // ค้นหา payment ทั้งหมดของเดือน/ปีนี้
+            database.ref('payments').once('value')
+                .then(snapshot => {
+                    const payments = snapshot.val() || {};
+                    const updates = {};
+                    Object.keys(payments).forEach(key => {
+                const payment = payments[key];
+                // ต้องเช็คทั้ง month และ year เป็น string หรือ number
+                if (
+                    (parseInt(payment.month) === parseInt(month)) &&
+                    (payment.year == year || parseInt(payment.year) === parseInt(year))
+                ) {
+                    updates[key] = null; // ลบ
+                }
+            });
+            if (Object.keys(updates).length === 0) {
+                hideLoading();
+                showToast('ไม่พบข้อมูลสำหรับเดือนนี้');
+                return;
+            }
+            return database.ref('payments').update(updates);
+        })
+        .then(() => {
+            hideLoading();
+            showToast('ลบเดือนสำเร็จ');
+            loadPaymentData();
+        })
+        .catch(error => {
+            hideLoading();
+            showToast(`เกิดข้อผิดพลาด: ${error.message}`);
+        });
+        }
+
+        // ฟังก์ชันเพิ่มสมาชิก (admin)
+        function handleAddStudent(e) {
+            e.preventDefault();
+            showLoading();
+            const studentId = document.getElementById('newStudentId').value;
+            const name = document.getElementById('newStudentName').value;
+            if (!studentId.match(/^6741440\d{4}$/)) {
+                hideLoading();
+                showToast('รหัสนักศึกษาไม่ถูกต้อง ต้องขึ้นต้นด้วย 6741440 ตามด้วยเลข 4 หลัก');
+                return;
+            }
+            const classNumber = studentId.charAt(8) === '1' ? 2 : 1;
+            database.ref('users').orderByChild('studentId').equalTo(studentId).once('value')
+                .then((snapshot) => {
+                    if (snapshot.exists()) {
+                        hideLoading();
+                        showToast('มีรหัสนักศึกษานี้ในระบบแล้ว');
+                        return;
+                    }
+                    const newUserKey = database.ref('users').push().key;
+                    const userData = {
+                        studentId: studentId,
+                        name: name,
+                        role: 'member',
+                        class: classNumber,
+                        createdAt: firebase.database.ServerValue.TIMESTAMP
+                    };
+                    return database.ref('users/' + newUserKey).set(userData);
+                })
+                .then(() => {
+                    // เพิ่ม payment สำหรับทุกเดือน-ปีที่มีอยู่ในระบบ
+                    return database.ref('payments').once('value').then((paymentsSnapshot) => {
+                        const payments = paymentsSnapshot.val() || {};
+                        const monthYearsSet = new Set();
+                        Object.values(payments).forEach(payment => {
+                            if (payment.month && payment.year) {
+                                monthYearsSet.add(`${payment.month}-${payment.year}`);
+                            }
+                        });
+                        if (monthYearsSet.size === 0) {
+                            const month = document.getElementById('monthSelect').value;
+                            const year = document.getElementById('yearSelect').value;
+                            monthYearsSet.add(`${month}-${year}`);
+                        }
+                        const batch = {};
+                        monthYearsSet.forEach(monthYear => {
+                            const [month, year] = monthYear.split('-');
+                            const paymentKey = database.ref('payments').push().key;
+                            batch[paymentKey] = {
+                                studentId: studentId,
+                                month: parseInt(month),
+                                year: year,
+                                paid: false,
+                                monthYear: `${month}-${year}`,
+                                timestamp: firebase.database.ServerValue.TIMESTAMP
+                            };
+                        });
+                        return database.ref('payments').update(batch);
+                    });
+                })
+                .then(() => {
+                    hideLoading();
+                    closeAddStudentModal();
+                    showToast('เพิ่มนักเรียนสำเร็จ');
+                    loadPaymentData();
+                })
+                .catch((error) => {
+                    hideLoading();
+                    showToast(`เกิดข้อผิดพลาด: ${error.message}`);
+                });
+        }
+
+        // Show add student modal
+        function showAddStudentModal() {
+            document.getElementById('addStudentModal').classList.remove('hidden');
+        }
+
+        // Close add student modal
+        function closeAddStudentModal() {
+            document.getElementById('addStudentModal').classList.add('hidden');
+            document.getElementById('addStudentForm').reset();
+        }
+
+        // Handle add activity
+        function handleAddActivity(e) {
+            e.preventDefault();
+            showLoading();
+
+            const date = document.getElementById('activityDate').value;
+            const description = document.getElementById('activityDescription').value;
+            const source = document.getElementById('activitySource').value;
+            const amount = parseFloat(document.getElementById('activityAmount').value);
+            const type = document.getElementById('activityType').value;
+
+            if (!date || !description || !source || isNaN(amount) || !type) {
+                hideLoading();
+                showToast('กรุณากรอกข้อมูลให้ครบถ้วน');
+                return;
+            }
+
+            const newActivityKey = database.ref('activities').push().key;
+            const activityData = {
+                date: date,
+                description: description,
+                source: source,
+                amount: amount,
+                type: type,
+                createdAt: firebase.database.ServerValue.TIMESTAMP
+            };
+
+            database.ref('activities/' + newActivityKey).set(activityData)
+                .then(() => {
+                    // Update balances
+                    return database.ref('balances').transaction((balances) => {
+                        if (!balances) balances = { class1: 0, class2: 0, central: 0 };
+                        if (type === 'income') {
+                            if (source === 'class1') balances.class1 += amount;
+                            else if (source === 'class2') balances.class2 += amount;
+                            else if (source === 'central') balances.central += amount;
+                            else if (source === 'central') balances.central += amount;
+                        } else if (type === 'expense') {
+                            if (source === 'class1') balances.class1 = Math.max(0, balances.class1 - amount);
+                            else if (source === 'class2') balances.class2 = Math.max(0, balances.class2 - amount);
+                            else if (source === 'central') balances.central = Math.max(0, balances.central - amount);
+                        }
+                        return balances;
+                    });
+                })
+                .then(() => {
+                    hideLoading();
+                    document.getElementById('addActivityForm').reset();
+                    document.getElementById('addActivityModal').classList.add('hidden');
+                    showToast('บันทึกกิจกรรมสำเร็จ');
+                    loadActivitiesData();
+                    loadBalanceData();
+                })
+                .catch((error) => {
+                    hideLoading();
+                    console.error("Error adding activity:", error);
+                    showToast(`เกิดข้อผิดพลาด: ${error.message}`);
+                });
+        }
+
+        // Show add activity modal
+        function showAddActivityModal() {
+            document.getElementById('addActivityModal').classList.remove('hidden');
+        }
+
+        // Close add activity modal
+        function closeAddActivityModal() {
+            document.getElementById('addActivityModal').classList.add('hidden');
+            document.getElementById('addActivityForm').reset();
+        }
+
+        // Load activities data
+        function loadActivitiesData() {
+            showLoading();
+            database.ref('activities').orderByChild('date').once('value')
+                .then((snapshot) => {
+                    const tableBody = document.getElementById('activitiesTable');
+                    tableBody.innerHTML = '';
+                    if (snapshot.exists()) {
+                        const activities = snapshot.val();
+                        const activityList = Object.keys(activities).map(key => ({ id: key, ...activities[key] }));
+                        activityList.sort((a, b) => new Date(b.date) - new Date(a.date));
+                        activityList.forEach(activity => {
+                            const row = document.createElement('tr');
+                            row.className = activity.type === 'income' ? 'bg-green-50' : 'bg-red-50';
+
+                            const dateCell = document.createElement('td');
+                            dateCell.className = 'py-3 px-4 border-b';
+                            dateCell.textContent = activity.date;
+
+                            const descCell = document.createElement('td');
+                            descCell.className = 'py-3 px-4 border-b';
+                            descCell.textContent = activity.description;
+
+                            const sourceCell = document.createElement('td');
+                            sourceCell.className = 'py-3 px-4 border-b';
+                            sourceCell.textContent = activity.source === 'class1' ? 'ห้อง 1' : activity.source === 'class2' ? 'ห้อง 2' : 'กองกลาง';
+
+                            const amountCell = document.createElement('td');
+                            amountCell.className = 'py-3 px-4 border-b';
+                            amountCell.textContent = activity.amount.toLocaleString();
+
+                            const typeCell = document.createElement('td');
+                            typeCell.className = 'py-3 px-4 border-b';
+                            typeCell.textContent = activity.type === 'income' ? 'รายรับ' : 'รายจ่าย';
+
+                            const actionsCell = document.createElement('td');
+                            actionsCell.className = 'py-3 px-4 border-b';
+                            const editBtn = document.createElement('button');
+                            editBtn.className = 'bg-blue-500 hover:bg-blue-600 text-white text-sm py-1 px-3 rounded';
+                            editBtn.textContent = 'แก้ไข';
+                            editBtn.onclick = () => showEditActivityModal(activity);
+
+                            actionsCell.appendChild(editBtn);
+
+                            row.appendChild(dateCell);
+                            row.appendChild(descCell);
+                            row.appendChild(sourceCell);
+                            row.appendChild(amountCell);
+                            row.appendChild(typeCell);
+                            row.appendChild(actionsCell);
+
+                            tableBody.appendChild(row);
+                        });
+                    } else {
+                        const row = document.createElement('tr');
+                        const cell = document.createElement('td');
+                        cell.colSpan = 6;
+                        cell.className = 'py-4 px-4 text-center text-gray-500';
+                        cell.textContent = 'ไม่พบข้อมูลกิจกรรม';
+                        row.appendChild(cell);
+                        tableBody.appendChild(row);
+                    }
+                    hideLoading();
+                })
+                .catch((error) => {
+                    hideLoading();
+                    console.error("Error loading activities:", error);
+                    showToast(`เกิดข้อผิดพลาด: ${error.message}`);
+                });
+        }
+
+        // Show edit activity modal
+        function showEditActivityModal(activity) {
+            document.getElementById('editActivityId').value = activity.id;
+            document.getElementById('editActivityDescription').value = activity.description;
+            document.getElementById('editActivitySource').value = activity.source;
+            document.getElementById('editActivityAmount').value = activity.amount;
+            document.getElementById('editActivityType').value = activity.type;
+            document.getElementById('editActivityModal').classList.remove('hidden');
+        }
+
+        // Close edit activity modal
+        function closeEditActivityModal() {
+            document.getElementById('editActivityModal').classList.add('hidden');
+            document.getElementById('editActivityForm').reset();
+        }
+
+        // Handle edit activity
+        function handleEditActivity(e) {
+            e.preventDefault();
+            showLoading();
+
+            const id = document.getElementById('editActivityId').value;
+            const date = document.getElementById('editActivityDate').value;
+            const description = document.getElementById('editActivityDescription').value;
+            const source = document.getElementById('editActivitySource').value;
+            const amount = parseFloat(document.getElementById('editActivityAmount').value);
+            const type = document.getElementById('editActivityType').value;
+
+            if (!id || !date || !description || !source || isNaN(amount) || !type) {
+                hideLoading();
+                showToast('กรุณากรอกข้อมูลให้ครบถ้วน');
+                return;
+            }
+
+            // Get old activity for balance adjustment
+            database.ref('activities/' + id).once('value')
+                .then((snapshot) => {
+                    const oldActivity = snapshot.val();
+                    // Update activity
+                    return database.ref('activities/' + id).update({
+                        date, description, source, amount, type
+                    }).then(() => ({ oldActivity, newActivity: { source, amount, type } }));
+                })
+                .then(({ oldActivity, newActivity }) => {
+                    // Adjust balances
+                    return database.ref('balances').transaction((balances) => {
+                        if (!balances) balances = { class1: 0, class2: 0, central: 0 };
+                        // Undo old
+                        if (oldActivity) {
+                            if (oldActivity.type === 'income') {
+                                if (oldActivity.source === 'class1') balances.class1 -= oldActivity.amount;
+                                else if (oldActivity.source === 'class2') balances.class2 -= oldActivity.amount;
+                                else if (oldActivity.source === 'central') balances.central -= oldActivity.amount;
+                            } else if (oldActivity.type === 'expense') {
+                                if (oldActivity.source === 'class1') balances.class1 += oldActivity.amount;
+                                else if (oldActivity.source === 'class2') balances.class2 += oldActivity.amount;
+                                else if (oldActivity.source === 'central') balances.central += oldActivity.amount;
+                            }
+                        }
+                        // Apply new
+                        if (newActivity.type === 'income') {
+                            if (newActivity.source === 'class1') balances.class1 += newActivity.amount;
+                            else if (newActivity.source === 'class2') balances.class2 += newActivity.amount;
+                            else if (newActivity.source === 'central') balances.central += newActivity.amount;
+                        } else if (newActivity.type === 'expense') {
+                            if (newActivity.source === 'class1') balances.class1 = Math.max(0, balances.class1 - newActivity.amount);
+                            else if (newActivity.source === 'class2') balances.class2 = Math.max(0, balances.class2 - newActivity.amount);
+                            else if (newActivity.source === 'central') balances.central = Math.max(0, balances.central - newActivity.amount);
+                        }
+                        return balances;
+                    });
+                })
+                .then(() => {
+                    hideLoading();
+                    closeEditActivityModal();
+                    showToast('แก้ไขกิจกรรมสำเร็จ');
+                    loadActivitiesData();
+                    loadBalanceData();
+                })
+                .catch((error) => {
+                    hideLoading();
+                    console.error("Error editing activity:", error);
+                    showToast(`เกิดข้อผิดพลาด: ${error.message}`);
+                });
+        }
+
+        // Delete activity
+        function deleteActivity() {
+            const id = document.getElementById('editActivityId').value;
+            if (!id) return;
+            showLoading();
+            // Get old activity for balance adjustment
+            database.ref('activities/' + id).once('value')
+                .then((snapshot) => {
+                    const oldActivity = snapshot.val();
+                    return database.ref('activities/' + id).remove()
+                        .then(() => oldActivity);
+                })
+                .then((oldActivity) => {
+                    // Adjust balances
+                    return database.ref('balances').transaction((balances) => {
+                        if (!balances) balances = { class1: 0, class2: 0, central: 0 };
+                        if (oldActivity) {
+                            if (oldActivity.type === 'income') {
+                                if (oldActivity.source === 'class1') balances.class1 -= oldActivity.amount;
+                                else if (oldActivity.source === 'class2') balances.class2 -= oldActivity.amount;
+                                else if (oldActivity.source === 'central') balances.central -= oldActivity.amount;
+                            } else if (oldActivity.type === 'expense') {
+                                if (oldActivity.source === 'class1') balances.class1 += oldActivity.amount;
+                                else if (oldActivity.source === 'class2') balances.class2 += oldActivity.amount;
+                                else if (oldActivity.source === 'central') balances.central += oldActivity.amount;
+                            }
+                        }
+                        return balances;
+                    });
+                })
+                .then(() => {
+                    hideLoading();
+                    closeEditActivityModal();
+                    showToast('ลบกิจกรรมสำเร็จ');
+                    loadActivitiesData();
+                    loadBalanceData();
+                })
+                .catch((error) => {
+                    hideLoading();
+                    console.error("Error deleting activity:", error);
+                    showToast(`เกิดข้อผิดพลาด: ${error.message}`);
+                });
+        }
+
+        // Edit central fund
+        function editCentralFund() {
+            database.ref('balances').once('value')
+                .then((snapshot) => {
+                    const balances = snapshot.val() || { central: 0 };
+                    document.getElementById('centralFundAmount').value = balances.central || 0;
+                    document.getElementById('editCentralFundModal').classList.remove('hidden');
+                });
+        }
+
+        function closeEditCentralFundModal() {
+            document.getElementById('editCentralFundModal').classList.add('hidden');
+            document.getElementById('editCentralFundForm').reset();
+        }
+
+        function handleEditCentralFund(e) {
+            e.preventDefault();
+            showLoading();
+            const amount = parseFloat(document.getElementById('centralFundAmount').value);
+            if (isNaN(amount) || amount < 0) {
+                hideLoading();
+                showToast('กรุณากรอกจำนวนเงินที่ถูกต้อง');
+                return;
+            }
+            database.ref('balances/central').set(amount)
+                .then(() => {
+                    hideLoading();
+                    closeEditCentralFundModal();
+                    showToast('แก้ไขเงินกองกลางสำเร็จ');
+                    loadBalanceData();
+                })
+                .catch((error) => {
+                    hideLoading();
+                    console.error("Error editing central fund:", error);
+                    showToast(`เกิดข้อผิดพลาด: ${error.message}`);
+                });
+        }
+
+        // Logout function
+        function logout() {
+            auth.signOut().then(() => {
+                showPage('homePage');
+                showToast('ออกจากระบบสำเร็จ');
+            });
+        }
+
+        // โหลดข้อมูลสมาชิกสำหรับจัดการ
+        function loadMemberManageTable() {
+            const tableBody = document.getElementById('memberManageTable');
+            tableBody.innerHTML = '<tr><td colspan="4" class="py-4 px-4 text-center text-gray-500">กำลังโหลดข้อมูล...</td></tr>';
+            database.ref('users').orderByChild('role').equalTo('member').once('value')
+                .then(snapshot => {
+                    tableBody.innerHTML = '';
+                    if (!snapshot.exists()) {
+                        const row = document.createElement('tr');
+                        const cell = document.createElement('td');
+                        cell.colSpan = 4;
+                        cell.className = 'py-4 px-4 text-center text-gray-500';
+                        cell.textContent = 'ไม่พบข้อมูลสมาชิก';
+                        row.appendChild(cell);
+                        tableBody.appendChild(row);
+                        return;
+                    }
+                    const users = snapshot.val();
+                    Object.keys(users).forEach(uid => {
+                        const user = users[uid];
+                        const row = document.createElement('tr');
+
+                        // รหัสนักศึกษา
+                        const idCell = document.createElement('td');
+                        idCell.className = 'py-3 px-4 border-b';
+                        idCell.textContent = user.studentId;
+                        row.appendChild(idCell);
+
+                        // ชื่อ
+                        const nameCell = document.createElement('td');
+                        nameCell.className = 'py-3 px-4 border-b';
+                        nameCell.textContent = user.name;
+                        row.appendChild(nameCell);
+
+                        // ห้อง (แก้ไขได้)
+                        const classCell = document.createElement('td');
+                        classCell.className = 'py-3 px-4 border-b text-center';
+                        const classSelect = document.createElement('select');
+                        classSelect.className = 'border rounded px-2 py-1';
+                        classSelect.innerHTML = `
+                            <option value="1" ${user.class == 1 ? 'selected' : ''}>1</option>
+                            <option value="2" ${user.class == 2 ? 'selected' : ''}>2</option>
+                        `;
+                        classSelect.onchange = () => updateUserClass(uid, classSelect.value);
+                        classCell.appendChild(classSelect);
+                        row.appendChild(classCell);
+
+                        // การจัดการ (ลบ)
+                        const actionCell = document.createElement('td');
+                        actionCell.className = 'py-3 px-4 border-b text-center';
+                        const delBtn = document.createElement('button');
+                        delBtn.className = 'bg-red-500 hover:bg-red-600 text-white text-xs py-1 px-3 rounded';
+                        delBtn.textContent = 'ลบ';
+                        delBtn.onclick = () => deleteUser(uid, user.studentId);
+                        actionCell.appendChild(delBtn);
+                        row.appendChild(actionCell);
+
+                        tableBody.appendChild(row);
+                    });
+                });
+        }
+
+        // ฟังก์ชันแก้ไขห้อง
+        function updateUserClass(uid, newClass) {
+            showLoading();
+            database.ref('users/' + uid + '/class').set(parseInt(newClass))
+                .then(() => {
+                    hideLoading();
+                    showToast('แก้ไขห้องสำเร็จ');
+                    loadPaymentData();
+                })
+                .catch(error => {
+                    hideLoading();
+                    showToast(`เกิดข้อผิดพลาด: ${error.message}`);
+                });
+        }
+
+        // ฟังก์ชันลบสมาชิก
+        function deleteUser(uid, studentId) {
+            if (!confirm(`ต้องการลบสมาชิก ${studentId} หรือไม่?`)) return;
+            showLoading();
+            // ลบ user
+            database.ref('users/' + uid).remove()
+                .then(() => {
+                    // ลบ payment ทั้งหมดของ studentId นี้
+                    return database.ref('payments').once('value').then(snapshot => {
+                        const payments = snapshot.val() || {};
+                        const updates = {};
+                        Object.keys(payments).forEach(key => {
+                            if (payments[key].studentId === studentId) {
+                                updates[key] = null;
+                            }
+                        });
+                        return database.ref('payments').update(updates);
+                    });
+                })
+                .then(() => {
+                    hideLoading();
+                    showToast('ลบสมาชิกสำเร็จ');
+                    loadMemberManageTable();
+                    loadPaymentData();
+                })
+                .catch(error => {
+                    hideLoading();
+                    showToast(`เกิดข้อผิดพลาด: ${error.message}`);
+                });
+        }
+
+        // เรียกโหลดข้อมูลสมาชิกเมื่อเข้าแดชบอร์ดเหรัญญิก
+        function showPage(pageId) {
+            // Hide all pages
+            document.querySelectorAll('#homePage, #loginPage, #registerPage, #studentDashboard, #adminDashboard').forEach(page => {
+                page.classList.add('hidden');
+            });
+            // Show the requested page
+            document.getElementById(pageId).classList.remove('hidden');
+            if (pageId === 'adminDashboard') {
+                loadMemberManageTable();
+            }
+        }
+
+        function togglePaymentStatus(studentId, month, year, newStatus, classNumber) {
+            showLoading();
+            // ค้นหา payment record ที่ตรงกับ studentId, month, year
+            database.ref('payments').once('value')
+                .then(snapshot => {
+                    const payments = snapshot.val() || {};
+                    let paymentKey = null;
+                    Object.keys(payments).forEach(key => {
+                        const p = payments[key];
+                        if (
+                            p.studentId === studentId &&
+                            parseInt(p.month) === parseInt(month) &&
+                            (p.year == year || parseInt(p.year) === parseInt(year))
+                        ) {
+                            paymentKey = key;
+                        }
+                    });
+                    if (paymentKey) {
+                        return database.ref('payments/' + paymentKey).update({ paid: newStatus });
+                    } else {
+                        // ถ้าไม่มี record ให้สร้างใหม่
+                        const newKey = database.ref('payments').push().key;
+                        return database.ref('payments/' + newKey).set({
+                            studentId: studentId,
+                            month: parseInt(month),
+                            year: year,
+                            paid: newStatus,
+                            monthYear: `${month}-${year}`,
+                            timestamp: firebase.database.ServerValue.TIMESTAMP
+                        });
+                    }
+                })
+                .then(() => {
+                    // ถ้า newStatus เป็น true (ชำระเงิน) ให้บวกยอดเงิน +100 บาท
+                    if (newStatus) {
+                        // classNumber: 1 หรือ 2
+                        const balanceField = classNumber == 1 ? 'class1' : 'class2';
+                        return database.ref('balances/' + balanceField).transaction(current => {
+                            return (current || 0) + 100;
+                        });
+                    } else {
+                        // ถ้ายกเลิกชำระเงิน ให้ลดยอดเงิน -100 บาท
+                        const balanceField = classNumber == 1 ? 'class1' : 'class2';
+                        return database.ref('balances/' + balanceField).transaction(current => {
+                            return Math.max(0, (current || 0) - 100);
+                        });
+                    }
+                })
+                .then(() => {
+                    hideLoading();
+                    loadPaymentData();
+                    loadBalanceData();
+                })
+                .catch(error => {
+                    hideLoading();
+                    showToast(`เกิดข้อผิดพลาด: ${error.message}`);
+                });
+        }
+    </script>
+</body>
+</html>
