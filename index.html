@@ -214,6 +214,24 @@
                             <p class="text-gray-700">ห้อง: <span id="studentClassDisplay" class="font-medium"></span></p>
                         </div>
                     </div>
+                    
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full bg-white border border-gray-200">
+                            <thead>
+                                <tr>
+                                    <th class="py-3 px-4 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">เดือน</th>
+                                    <th class="py-3 px-4 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">ปี</th>
+                                    <th class="py-3 px-4 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">สถานะ</th>
+                                </tr>
+                            </thead>
+                            <tbody id="studentPaymentTable">
+                                <!-- Payment data will be populated here -->
+                                <tr>
+                                    <td colspan="3" class="py-4 px-4 text-center text-gray-500">กำลังโหลดข้อมูล...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                     <!-- ...ใน div#studentDashboard ... -->
                     <div class="mt-10">
                         <h3 class="text-lg font-bold text-gray-800 mb-4">กิจกรรมการเงิน</h3>
@@ -235,23 +253,6 @@
                                 </tbody>
                             </table>
                         </div>
-                    </div>
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full bg-white border border-gray-200">
-                            <thead>
-                                <tr>
-                                    <th class="py-3 px-4 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">เดือน</th>
-                                    <th class="py-3 px-4 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">ปี</th>
-                                    <th class="py-3 px-4 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">สถานะ</th>
-                                </tr>
-                            </thead>
-                            <tbody id="studentPaymentTable">
-                                <!-- Payment data will be populated here -->
-                                <tr>
-                                    <td colspan="3" class="py-4 px-4 text-center text-gray-500">กำลังโหลดข้อมูล...</td>
-                                </tr>
-                            </tbody>
-                        </table>
                     </div>
                 </div>
             </div>
