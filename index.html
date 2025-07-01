@@ -810,7 +810,6 @@
                             document.getElementById('studentClassDisplay').textContent = userData.class;
                             showPage('studentDashboard');
                             loadStudentPaymentData(userData.studentId);
-                            loadStudentActivities(); // <<--- เพิ่มบรรทัดนี้
                         }
                     } else {
                         showToast('ไม่พบข้อมูลผู้ใช้');
@@ -910,64 +909,6 @@
                 });
         }
 
-        function loadStudentActivities() {
-            const tableBody = document.getElementById('studentActivitiesTable');
-            tableBody.innerHTML = '<tr><td colspan="5" class="py-4 px-4 text-center text-gray-500">กำลังโหลดข้อมูล...</td></tr>';
-            database.ref('activities').orderByChild('date').once('value')
-                .then((snapshot) => {
-                    tableBody.innerHTML = '';
-                    if (snapshot.exists()) {
-                        const activities = snapshot.val();
-                        const activityList = Object.keys(activities).map(key => ({ id: key, ...activities[key] }));
-                        activityList.sort((a, b) => new Date(b.date) - new Date(a.date));
-                        activityList.forEach(activity => {
-                            const row = document.createElement('tr');
-                            row.className = activity.type === 'income' ? 'bg-green-50' : 'bg-red-50';
-        
-                            const dateCell = document.createElement('td');
-                            dateCell.className = 'py-3 px-4 border-b';
-                            dateCell.textContent = activity.date;
-        
-                            const descCell = document.createElement('td');
-                            descCell.className = 'py-3 px-4 border-b';
-                            descCell.textContent = activity.description;
-        
-                            const sourceCell = document.createElement('td');
-                            sourceCell.className = 'py-3 px-4 border-b';
-                            sourceCell.textContent = activity.source === 'class1' ? 'ห้อง 1' : activity.source === 'class2' ? 'ห้อง 2' : 'กองกลาง';
-        
-                            const amountCell = document.createElement('td');
-                            amountCell.className = 'py-3 px-4 border-b';
-                            amountCell.textContent = activity.amount.toLocaleString();
-        
-                            const typeCell = document.createElement('td');
-                            typeCell.className = 'py-3 px-4 border-b';
-                            typeCell.textContent = activity.type === 'income' ? 'รายรับ' : 'รายจ่าย';
-        
-                            row.appendChild(dateCell);
-                            row.appendChild(descCell);
-                            row.appendChild(sourceCell);
-                            row.appendChild(amountCell);
-                            row.appendChild(typeCell);
-        
-                            tableBody.appendChild(row);
-                        });
-                    } else {
-                        const row = document.createElement('tr');
-                        const cell = document.createElement('td');
-                        cell.colSpan = 5;
-                        cell.className = 'py-4 px-4 text-center text-gray-500';
-                        cell.textContent = 'ไม่พบข้อมูลกิจกรรม';
-                        row.appendChild(cell);
-                        tableBody.appendChild(row);
-                    }
-                    hideLoading();
-                })
-                .catch((error) => {
-                    hideLoading();
-                    tableBody.innerHTML = '<tr><td colspan="5" class="py-4 px-4 text-center text-red-500">เกิดข้อผิดพลาด</td></tr>';
-                });
-        }
         // Load balance data for admin dashboard
         function loadBalanceData() {
             database.ref('balances').once('value')
