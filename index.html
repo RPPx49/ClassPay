@@ -68,30 +68,25 @@
         </div>
     </div>
 
-    <!-- Home Page -->
+    <!-- ...แทนที่ div#homePage เดิมด้วย... -->
     <div id="homePage" class="container mx-auto px-4 py-8">
         <div class="max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden md:max-w-2xl">
             <div class="p-8">
-                <div class="flex justify-center mb-6">
-                    <svg class="w-16 h-16 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838l-2.727 1.17 1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762zM9.3 16.573A9.026 9.026 0 007 14.935v-3.957l1.818.78a3 3 0 002.364 0l5.508-2.361a11.026 11.026 0 01.25 3.762 1 1 0 01-.89.89 8.968 8.968 0 00-5.35 2.524 1 1 0 01-1.4 0zM6 18a1 1 0 001-1v-2.065a8.935 8.935 0 00-2-.712V17a1 1 0 001 1z"></path>
-                    </svg>
-                </div>
                 <h1 class="text-2xl font-bold text-center text-gray-800 mb-4">ระบบเก็บเงินในห้องเรียน</h1>
-                <p class="text-gray-600 text-center mb-8">ระบบจัดการการเงินสำหรับห้องเรียน ช่วยให้การเก็บเงินและติดตามการชำระเงินเป็นไปอย่างมีประสิทธิภาพ</p>
-                <div class="flex flex-col space-y-4">
-                    <button onclick="showPage('loginPage')" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition duration-300 flex items-center justify-center">
-                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path>
-                        </svg>
-                        เข้าสู่ระบบ
-                    </button>
-                    <button onclick="showPage('registerPage')" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg transition duration-300 flex items-center justify-center">
-                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
-                        </svg>
-                        สมัครสมาชิก
-                    </button>
+                <p class="text-gray-600 text-center mb-8">เลือกชื่อนักศึกษาเพื่อดูข้อมูลกิจกรรมการเงินของตนเอง</p>
+                <form id="studentSelectForm" class="space-y-4">
+                    <div>
+                        <label for="studentSelect" class="block text-sm font-medium text-gray-700 mb-1">เลือกชื่อนักศึกษา</label>
+                        <select id="studentSelect" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="">-- กรุณาเลือก --</option>
+                            <!-- รายชื่อนักศึกษาจะถูกเติมโดย JS -->
+                        </select>
+                    </div>
+                    <button type="button" id="viewStudentBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md transition duration-300" disabled>ดูข้อมูลกิจกรรมการเงิน</button>
+                </form>
+                <div class="mt-6 flex flex-col space-y-2">
+                    <button onclick="showPage('loginPage')" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-md transition duration-300">เข้าสู่ระบบเหรัญญิก</button>
+                    <button onclick="showAddStudentModal()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-md transition duration-300">เพิ่มนักศึกษาใหม่</button>
                 </div>
             </div>
         </div>
@@ -254,6 +249,7 @@
                             </table>
                         </div>
                     </div>
+                    
                 </div>
             </div>
         </div>
@@ -692,20 +688,54 @@
                 loadActivitiesData();
             }
         }
-
+        function loadStudentDropdown() {
+            const select = document.getElementById('studentSelect');
+            select.innerHTML = '<option value="">-- กรุณาเลือก --</option>';
+            database.ref('users').orderByChild('role').equalTo('member').once('value')
+                .then(snapshot => {
+                    if (!snapshot.exists()) return;
+                    const users = snapshot.val();
+                    // sort ตาม studentId
+                    const userArr = Object.keys(users).map(uid => ({ uid, ...users[uid] }));
+                    userArr.sort((a, b) => a.studentId.localeCompare(b.studentId));
+                    userArr.forEach(user => {
+                        const option = document.createElement('option');
+                        option.value = user.studentId;
+                        option.textContent = `${user.studentId} - ${user.name}`;
+                        select.appendChild(option);
+                    });
+                });
+        }
         // Toggle admin code input visibility based on role selection
         document.addEventListener('DOMContentLoaded', function() {
-            const roleInputs = document.querySelectorAll('input[name="role"]');
-            roleInputs.forEach(input => {
-                input.addEventListener('change', function() {
-                    const adminCodeContainer = document.getElementById('adminCodeContainer');
-                    if (this.value === 'admin') {
-                        adminCodeContainer.classList.remove('hidden');
-                    } else {
-                        adminCodeContainer.classList.add('hidden');
-                    }
-                });
+            loadStudentDropdown();
+
+            const select = document.getElementById('studentSelect');
+            const viewBtn = document.getElementById('viewStudentBtn');
+            select.addEventListener('change', function() {
+                viewBtn.disabled = !select.value;
             });
+            viewBtn.addEventListener('click', function() {
+                if (!select.value) return;
+                // หา user จาก studentId
+                database.ref('users').orderByChild('studentId').equalTo(select.value).once('value')
+                    .then(snapshot => {
+                        if (!snapshot.exists()) {
+                            showToast('ไม่พบข้อมูลนักศึกษา');
+                            return;
+                        }
+                        const userObj = Object.values(snapshot.val())[0];
+                        // set currentUserData แล้วแสดง dashboard
+                        currentUserData = userObj;
+                        document.getElementById('studentName').textContent = userObj.name;
+                        document.getElementById('studentIdDisplay').textContent = userObj.studentId;
+                        document.getElementById('studentClassDisplay').textContent = userObj.class;
+                        showPage('studentDashboard');
+                        loadStudentPaymentData(userObj.studentId);
+                        loadStudentActivities();
+                    });
+            });
+        
 
             // Set up form submission handlers
             document.getElementById('registerForm').addEventListener('submit', handleRegister);
