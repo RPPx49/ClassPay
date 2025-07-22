@@ -55,12 +55,10 @@
     </style>
 </head>
 <body class="bg-gray-100 min-h-screen">
-    <!-- Toast Notification -->
     <div id="toast" class="toast">
         <span id="toastMessage"></span>
     </div>
 
-    <!-- Loading Overlay -->
     <div id="loadingOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
         <div class="bg-white p-5 rounded-lg flex flex-col items-center">
             <div class="loader"></div>
@@ -68,7 +66,6 @@
         </div>
     </div>
 
-    <!-- ...แทนที่ div#homePage เดิมด้วย... -->
     <div id="homePage" class="container mx-auto px-4 py-8">
         <div class="max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden md:max-w-2xl">
             <div class="p-8">
@@ -79,8 +76,7 @@
                         <label for="studentSelect" class="block text-sm font-medium text-gray-700 mb-1">เลือกชื่อนักศึกษา</label>
                         <select id="studentSelect" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                             <option value="">-- กรุณาเลือก --</option>
-                            <!-- รายชื่อนักศึกษาจะถูกเติมโดย JS -->
-                        </select>
+                            </select>
                     </div>
                     <button type="button" id="viewStudentBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md transition duration-300" disabled>ดูข้อมูลกิจกรรมการเงิน</button>
                 </form>
@@ -92,7 +88,6 @@
         </div>
     </div>
 
-    <!-- Login Page -->
     <div id="loginPage" class="container mx-auto px-4 py-8 hidden">
         <div class="max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden">
             <div class="p-8">
@@ -122,7 +117,6 @@
         </div>
     </div>
 
-    <!-- Register Page -->
     <div id="registerPage" class="container mx-auto px-4 py-8 hidden">
         <div class="max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden">
             <div class="p-8">
@@ -178,7 +172,6 @@
         </div>
     </div>
 
-    <!-- Student Dashboard -->
     <div id="studentDashboard" class="container mx-auto px-4 py-8 hidden">
         <div class="max-w-4xl mx-auto">
             <div class="bg-white rounded-xl shadow-md overflow-hidden mb-6">
@@ -216,18 +209,17 @@
                                 <tr>
                                     <th class="py-3 px-4 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">เดือน</th>
                                     <th class="py-3 px-4 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">ปี</th>
+                                    <th class="py-3 px-4 bg-gray-50 text-right text-xs font-medium text-gray-500 uppercase tracking-wider border-b">ยอดชำระ</th>
                                     <th class="py-3 px-4 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">สถานะ</th>
                                 </tr>
                             </thead>
                             <tbody id="studentPaymentTable">
-                                <!-- Payment data will be populated here -->
                                 <tr>
-                                    <td colspan="3" class="py-4 px-4 text-center text-gray-500">กำลังโหลดข้อมูล...</td>
+                                    <td colspan="4" class="py-4 px-4 text-center text-gray-500">กำลังโหลดข้อมูล...</td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
-                    <!-- ...ใน div#studentDashboard ... -->
                     <div class="mt-10">
                         <h3 class="text-lg font-bold text-gray-800 mb-4">กิจกรรมการเงิน</h3>
                         <div class="overflow-x-auto">
@@ -255,7 +247,6 @@
         </div>
     </div>
 
-    <!-- Admin Dashboard -->
     <div id="adminDashboard" class="container mx-auto px-4 py-8 hidden">
         <div class="max-w-7xl mx-auto">
             <div class="bg-white rounded-xl shadow-md overflow-hidden mb-6">
@@ -273,7 +264,6 @@
                         </div>
                     </div>
 
-                    <!-- Admin Tabs -->
                     <div class="mb-6">
                         <div class="border-b border-gray-200">
                             <nav class="-mb-px flex space-x-8">
@@ -287,7 +277,6 @@
                         </div>
                     </div>
 
-                    <!-- Payments Tab Content -->
                     <div id="paymentsTab" class="admin-tab">
                         <div class="mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div class="bg-blue-50 p-4 rounded-lg">
@@ -346,6 +335,10 @@
                                         <option value="2">ห้อง 2</option>
                                     </select>
                                 </div>
+                                <div>
+                                    <label for="monthAmount" class="block text-sm font-medium text-gray-700 mb-1">จำนวนเงินที่จะเก็บ (บาท)</label>
+                                    <input type="number" id="monthAmount" class="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" min="1" value="100">
+                                </div>
                             </div>
                             <div class="flex space-x-2">
                                 <button onclick="addNewMonth()" class="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-md transition duration-300 flex items-center">
@@ -370,11 +363,9 @@
                                         <th class="py-3 px-4 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">รหัสนักศึกษา</th>
                                         <th class="py-3 px-4 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">ชื่อ-นามสกุล</th>
                                         <th class="py-3 px-4 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">ห้อง</th>
-                                        <!-- ส่วนนี้จะถูกเติมโดย JS -->
-                                    </tr>
+                                        </tr>
                                 </thead>
                                 <tbody id="adminPaymentTable">
-                                    <!-- Payment data will be populated here -->
                                     <tr>
                                         <td colspan="5" class="py-4 px-4 text-center text-gray-500">กำลังโหลดข้อมูล...</td>
                                     </tr>
@@ -382,7 +373,6 @@
                             </table>
                         </div>
 
-                        <!-- เพิ่มในส่วน Admin Dashboard ใต้ตารางการชำระเงิน หรือหลังปุ่ม "เพิ่มนักเรียน" -->
                         <div class="mt-10">
                             <h3 class="text-lg font-bold text-gray-800 mb-4">จัดการข้อมูลสมาชิก</h3>
                             <div class="overflow-x-auto">
@@ -405,7 +395,6 @@
                         </div>
                     </div>
 
-                    <!-- Activities Tab Content -->
                     <div id="activitiesTab" class="admin-tab hidden">
                         <div class="mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div class="bg-blue-50 p-4 rounded-lg">
@@ -444,7 +433,6 @@
                                     </tr>
                                 </thead>
                                 <tbody id="activitiesTable">
-                                    <!-- Activities data will be populated here -->
                                     <tr>
                                         <td colspan="6" class="py-4 px-4 text-center text-gray-500">กำลังโหลดข้อมูล...</td>
                                     </tr>
@@ -457,7 +445,6 @@
         </div>
     </div>
 
-    <!-- Add Student Modal -->
     <div id="addStudentModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
         <div class="bg-white p-6 rounded-lg max-w-md w-full">
             <div class="flex justify-between items-center mb-4">
@@ -482,7 +469,6 @@
         </div>
     </div>
 
-    <!-- Add Activity Modal -->
     <div id="addActivityModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
         <div class="bg-white p-6 rounded-lg max-w-md w-full">
             <div class="flex justify-between items-center mb-4">
@@ -526,7 +512,6 @@
         </div>
     </div>
 
-    <!-- Edit Central Fund Modal -->
     <div id="editCentralFundModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
         <div class="bg-white p-6 rounded-lg max-w-md w-full">
             <div class="flex justify-between items-center mb-4">
@@ -546,8 +531,29 @@
             </form>
         </div>
     </div>
+    
+    <div id="editMonthModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
+        <div class="bg-white p-6 rounded-lg max-w-md w-full">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-bold text-gray-800" id="editMonthModalTitle">แก้ไขยอดเงินเดือน</h3>
+                <button onclick="closeEditMonthModal()" class="text-gray-500 hover:text-gray-700">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            <form id="editMonthForm" class="space-y-4">
+                <input type="hidden" id="editMonthMonth">
+                <input type="hidden" id="editMonthYear">
+                <div>
+                    <label for="editMonthAmount" class="block text-sm font-medium text-gray-700 mb-1">จำนวนเงินใหม่ (บาท)</label>
+                    <input type="number" id="editMonthAmount" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="กรอกจำนวนเงิน" required min="1">
+                </div>
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md transition duration-300">บันทึกการเปลี่ยนแปลง</button>
+            </form>
+        </div>
+    </div>
 
-    <!-- Edit Activity Modal -->
     <div id="editActivityModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
         <div class="bg-white p-6 rounded-lg max-w-md w-full">
             <div class="flex justify-between items-center mb-4">
@@ -710,6 +716,18 @@
         document.addEventListener('DOMContentLoaded', function() {
             loadStudentDropdown();
 
+            const roleRadios = document.querySelectorAll('input[name="role"]');
+            const adminCodeContainer = document.getElementById('adminCodeContainer');
+            roleRadios.forEach(radio => {
+                radio.addEventListener('change', (e) => {
+                    if (e.target.value === 'admin') {
+                        adminCodeContainer.classList.remove('hidden');
+                    } else {
+                        adminCodeContainer.classList.add('hidden');
+                    }
+                });
+            });
+
             const select = document.getElementById('studentSelect');
             const viewBtn = document.getElementById('viewStudentBtn');
             select.addEventListener('change', function() {
@@ -744,6 +762,7 @@
             document.getElementById('addActivityForm').addEventListener('submit', handleAddActivity);
             document.getElementById('editCentralFundForm').addEventListener('submit', handleEditCentralFund);
             document.getElementById('editActivityForm').addEventListener('submit', handleEditActivity);
+            document.getElementById('editMonthForm').addEventListener('submit', handleEditMonthAmount); // New handler
 
             // Check if user is already logged in
             auth.onAuthStateChanged(user => {
@@ -811,7 +830,8 @@
                 .then(() => {
                     hideLoading();
                     showToast('สมัครสมาชิกสำเร็จ');
-                    // Form will be reset automatically when page changes
+                    showPage('loginPage');
+                    document.getElementById('registerForm').reset();
                 })
                 .catch((error) => {
                     hideLoading();
@@ -863,7 +883,7 @@
                             document.getElementById('studentClassDisplay').textContent = userData.class;
                             showPage('studentDashboard');
                             loadStudentPaymentData(userData.studentId);
-                            loadStudentActivities(); // <<--- เพิ่มบรรทัดนี้
+                            loadStudentActivities();
                         }
                     } else {
                         showToast('ไม่พบข้อมูลผู้ใช้');
@@ -880,26 +900,24 @@
 
         // Load student payment data
         function loadStudentPaymentData(studentId) {
-            showLoading();
-            // ดึง payments ทั้งหมด (ไม่ใช่แค่ของนักเรียนนี้)
+            const tableBody = document.getElementById('studentPaymentTable');
+            tableBody.innerHTML = '<tr><td colspan="4" class="py-4 px-4 text-center text-gray-500">กำลังโหลดข้อมูล...</td></tr>';
             database.ref('payments').once('value')
                 .then((snapshot) => {
                     const allPayments = snapshot.val() || {};
-                    // หาเดือน-ปีที่มีในระบบ (Set)
                     const monthYearSet = new Set();
                     Object.values(allPayments).forEach(payment => {
                         if (payment.month && payment.year) {
                             monthYearSet.add(`${parseInt(payment.month)}-${payment.year}`);
                         }
                     });
-                    // เรียงเดือน-ปี
+
                     const sortedMonthYears = Array.from(monthYearSet).sort((a, b) => {
                         const [mA, yA] = a.split('-').map(Number);
                         const [mB, yB] = b.split('-').map(Number);
                         return yA !== yB ? yA - yB : mA - mB;
                     });
 
-                    // ดึง payment ของนักเรียนนี้
                     const studentPayments = {};
                     Object.keys(allPayments).forEach(key => {
                         const p = allPayments[key];
@@ -908,25 +926,15 @@
                         }
                     });
 
-                    // สร้างตาราง
-                    const tableBody = document.getElementById('studentPaymentTable');
                     tableBody.innerHTML = '';
                     if (sortedMonthYears.length === 0) {
-                        const row = document.createElement('tr');
-                        const cell = document.createElement('td');
-                        cell.colSpan = 3;
-                        cell.className = 'py-4 px-4 text-center text-gray-500';
-                        cell.textContent = 'ไม่พบข้อมูลการชำระเงิน';
-                        row.appendChild(cell);
-                        tableBody.appendChild(row);
+                        tableBody.innerHTML = '<tr><td colspan="4" class="py-4 px-4 text-center text-gray-500">ไม่พบข้อมูลการชำระเงิน</td></tr>';
                     } else {
                         sortedMonthYears.forEach(monthYear => {
                             const [month, year] = monthYear.split('-');
-                            const payment = studentPayments[monthYear] || {
-                                month: parseInt(month),
-                                year: year,
-                                paid: false
-                            };
+                            const payment = studentPayments[monthYear] || { paid: false };
+                            const amount = payment.amount || 100; // Default if not set
+
                             const row = document.createElement('tr');
                             row.className = payment.paid ? 'bg-green-50' : 'bg-red-50';
 
@@ -937,6 +945,10 @@
                             const yearCell = document.createElement('td');
                             yearCell.className = 'py-3 px-4 border-b';
                             yearCell.textContent = parseInt(year) + 543;
+
+                            const amountCell = document.createElement('td');
+                            amountCell.className = 'py-3 px-4 border-b text-right';
+                            amountCell.textContent = amount.toLocaleString() + ' บาท';
 
                             const statusCell = document.createElement('td');
                             statusCell.className = 'py-3 px-4 border-b';
@@ -949,17 +961,12 @@
 
                             row.appendChild(monthCell);
                             row.appendChild(yearCell);
+                            row.appendChild(amountCell);
                             row.appendChild(statusCell);
 
                             tableBody.appendChild(row);
                         });
                     }
-                    hideLoading();
-                })
-                .catch((error) => {
-                    hideLoading();
-                    console.error("Error loading student payment data:", error);
-                    showToast(`เกิดข้อผิดพลาด: ${error.message}`);
                 });
         }
 
@@ -1028,14 +1035,14 @@
                     const balances = snapshot.val() || { class1: 0, class2: 0, central: 0 };
                     
                     // Update balances in payments tab
-                    document.getElementById('class1Balance').textContent = `${balances.class1.toLocaleString()} บาท`;
-                    document.getElementById('class2Balance').textContent = `${balances.class2.toLocaleString()} บาท`;
-                    document.getElementById('centralFundBalance').textContent = `${balances.central.toLocaleString()} บาท`;
+                    document.getElementById('class1Balance').textContent = `${(balances.class1 || 0).toLocaleString()} บาท`;
+                    document.getElementById('class2Balance').textContent = `${(balances.class2 || 0).toLocaleString()} บาท`;
+                    document.getElementById('centralFundBalance').textContent = `${(balances.central || 0).toLocaleString()} บาท`;
                     
                     // Update balances in activities tab
-                    document.getElementById('class1BalanceAct').textContent = `${balances.class1.toLocaleString()} บาท`;
-                    document.getElementById('class2BalanceAct').textContent = `${balances.class2.toLocaleString()} บาท`;
-                    document.getElementById('centralFundBalanceAct').textContent = `${balances.central.toLocaleString()} บาท`;
+                    document.getElementById('class1BalanceAct').textContent = `${(balances.class1 || 0).toLocaleString()} บาท`;
+                    document.getElementById('class2BalanceAct').textContent = `${(balances.class2 || 0).toLocaleString()} บาท`;
+                    document.getElementById('centralFundBalanceAct').textContent = `${(balances.central || 0).toLocaleString()} บาท`;
                 })
                 .catch((error) => {
                     console.error("Error loading balance data:", error);
@@ -1046,7 +1053,6 @@
         // Load payment data for admin dashboard
         function loadPaymentData() {
             showLoading();
-            const year = document.getElementById('yearSelect').value;
             const classFilter = document.getElementById('classFilter').value;
 
             // ดึง users ทั้งหมด
@@ -1090,7 +1096,8 @@
                                     const th = document.createElement('th');
                                     th.className = "py-3 px-4 bg-gray-50 text-center text-xs font-medium text-gray-500 uppercase tracking-wider border-b";
                                     th.innerHTML = `${thaiMonthsShort[m-1]} ${parseInt(y) + 543}<br>
-                                        <button onclick="deleteMonth(${m}, '${y}')" class="text-red-500 hover:text-red-700 text-xs underline">ลบ</button>`;
+                                        <button onclick="showEditMonthModal(${m}, '${y}')" class="text-blue-500 hover:text-blue-700 text-xs underline">แก้ไข</button>
+                                        <button onclick="deleteMonth(${m}, '${y}')" class="text-red-500 hover:text-red-700 text-xs underline ml-1">ลบ</button>`;
                                     headerRow.appendChild(th);
                                 });
 
@@ -1116,7 +1123,7 @@
 
                                         // ชื่อ-นามสกุล (ไม่ย่อ)
                                         const nameCell = document.createElement('td');
-                                        nameCell.className = 'py-3 px-4 border-b w-[450px] whitespace-normal break-words'; // เพิ่ม max-w-[180px]
+                                        nameCell.className = 'py-3 px-4 border-b w-[250px] whitespace-normal break-words';
                                         nameCell.textContent = user.name;
                                         row.appendChild(nameCell);
 
@@ -1131,49 +1138,42 @@
                                             const [m, y] = my.split('-');
                                             let userPayment = null;
                                             Object.keys(payments).forEach(key => {
+                                                const p = payments[key];
                                                 if (
-                                                    payments[key].studentId === user.studentId &&
-                                                    parseInt(payments[key].month) === parseInt(m) &&
-                                                    (payments[key].year == y || parseInt(payments[key].year) === parseInt(y))
+                                                    p.studentId === user.studentId &&
+                                                    parseInt(p.month) === parseInt(m) &&
+                                                    (p.year == y || parseInt(p.year) === parseInt(y))
                                                 ) {
-                                                    userPayment = payments[key];
+                                                    userPayment = p;
                                                     userPayment.id = key;
                                                 }
                                             });
-                                            if (!userPayment) {
-                                                userPayment = {
-                                                    studentId: user.studentId,
-                                                    month: parseInt(m),
-                                                    year: y,
-                                                    paid: false,
-                                                    monthYear: `${m}-${y}`
-                                                };
-                                            }
+                                            
                                             const statusCell = document.createElement('td');
                                             statusCell.className = 'py-3 px-4 border-b text-center';
                                             statusCell.title = thaiMonths[parseInt(m) - 1] + ' ' + (parseInt(y) + 543);
-
-                                            // ย่อเดือนใน cell
-                                            const monthShortSpan = document.createElement('span');
-                                            monthShortSpan.className = 'block text-xs text-gray-400 mb-1';
-                                            monthShortSpan.textContent = thaiMonthsShort[parseInt(m) - 1];
-                                            statusCell.appendChild(monthShortSpan);
-
+                                            
+                                            const paid = userPayment ? userPayment.paid : false;
+                                            const amount = userPayment ? (userPayment.amount || 100) : 100;
+                                            
+                                            const amountSpan = document.createElement('div');
+                                            amountSpan.className = 'text-xs text-gray-500';
+                                            amountSpan.textContent = `(${amount} บ.)`;
+                                            
                                             const statusBadge = document.createElement('span');
-                                            statusBadge.className = userPayment.paid ?
+                                            statusBadge.className = paid ?
                                                 'px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800' :
                                                 'px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800';
-                                            statusBadge.textContent = userPayment.paid ? '✓' : '✗';
-
-                                            // ปุ่ม toggle
+                                            statusBadge.textContent = paid ? 'ชำระแล้ว' : 'ยังไม่ชำระ';
+                                            
                                             const toggleButton = document.createElement('button');
-                                            toggleButton.className = userPayment.paid ?
-                                                'ml-2 bg-red-500 hover:bg-red-600 text-white text-xs py-1 px-2 rounded' :
-                                                'ml-2 bg-green-500 hover:bg-green-600 text-white text-xs py-1 px-2 rounded';
-                                            toggleButton.textContent = userPayment.paid ? 'ยกเลิก' : 'ชำระ';
-                                            toggleButton.onclick = () => togglePaymentStatus(user.studentId, parseInt(m), y, !userPayment.paid, user.class);
+                                            toggleButton.className = `mt-1 text-white text-xs py-1 px-2 rounded ${paid ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'}`;
+                                            toggleButton.textContent = paid ? 'ยกเลิก' : 'ชำระเงิน';
+                                            toggleButton.onclick = () => togglePaymentStatus(user.studentId, parseInt(m), y, !paid, user.class, amount);
 
+                                            statusCell.appendChild(amountSpan);
                                             statusCell.appendChild(statusBadge);
+                                            statusCell.appendChild(document.createElement('br'));
                                             statusCell.appendChild(toggleButton);
 
                                             row.appendChild(statusCell);
@@ -1195,9 +1195,21 @@
         function addNewMonth() {
             const month = document.getElementById('monthSelect').value;
             const year = document.getElementById('yearSelect').value;
+            const amount = parseInt(document.getElementById('monthAmount').value) || 100; // ดึงยอดเงินจาก input
+            
+            if (!amount || amount <= 0) {
+                showToast('กรุณาระบุจำนวนเงินที่ถูกต้อง');
+                return;
+            }
+
             showLoading();
             database.ref('users').orderByChild('role').equalTo('member').once('value')
                 .then((snapshot) => {
+                    if (!snapshot.exists()) {
+                        hideLoading();
+                        showToast('ไม่พบข้อมูลนักเรียน ไม่สามารถเพิ่มเดือนได้');
+                        return;
+                    }
                     const users = snapshot.val() || {};
                     const batch = {};
                     Object.keys(users).forEach(userId => {
@@ -1208,6 +1220,7 @@
                             month: parseInt(month),
                             year: year,
                             paid: false,
+                            amount: amount, // เพิ่ม field amount
                             monthYear: `${month}-${year}`,
                             timestamp: firebase.database.ServerValue.TIMESTAMP
                         };
@@ -1226,40 +1239,74 @@
         }
 
         function deleteMonth(month, year) {
-            if (!confirm(`ต้องการลบข้อมูลการชำระเงินของเดือน ${thaiMonths[month - 1]} ปี ${parseInt(year) + 543} หรือไม่?`)) return;
+            if (!confirm(`ต้องการลบข้อมูลการชำระเงินของเดือน ${thaiMonths[month - 1]} ปี ${parseInt(year) + 543} หรือไม่? การกระทำนี้จะลบข้อมูลของทุกคนและไม่สามารถย้อนกลับได้`)) return;
             showLoading();
-            // ค้นหา payment ทั้งหมดของเดือน/ปีนี้
-            database.ref('payments').once('value')
+            let totalClass1Refund = 0;
+            let totalClass2Refund = 0;
+            const updates = {};
+            let studentClassMap = {};
+
+            // 1. Get all users to map studentId to class
+            database.ref('users').once('value')
+                .then(usersSnapshot => {
+                    const users = usersSnapshot.val() || {};
+                    for (const uid in users) {
+                        studentClassMap[users[uid].studentId] = users[uid].class;
+                    }
+                    // 2. Get all payments for the specific month/year
+                    return database.ref('payments').orderByChild('monthYear').equalTo(`${month}-${year}`).once('value');
+                })
                 .then(snapshot => {
                     const payments = snapshot.val() || {};
-                    const updates = {};
+                    if (Object.keys(payments).length === 0) {
+                        hideLoading();
+                        showToast('ไม่พบข้อมูลสำหรับเดือนนี้');
+                        return Promise.reject('No data');
+                    }
+                    
                     Object.keys(payments).forEach(key => {
-                const payment = payments[key];
-                // ต้องเช็คทั้ง month และ year เป็น string หรือ number
-                if (
-                    (parseInt(payment.month) === parseInt(month)) &&
-                    (payment.year == year || parseInt(payment.year) === parseInt(year))
-                ) {
-                    updates[key] = null; // ลบ
-                }
-            });
-            if (Object.keys(updates).length === 0) {
-                hideLoading();
-                showToast('ไม่พบข้อมูลสำหรับเดือนนี้');
-                return;
-            }
-            return database.ref('payments').update(updates);
-        })
-        .then(() => {
-            hideLoading();
-            showToast('ลบเดือนสำเร็จ');
-            loadPaymentData();
-        })
-        .catch(error => {
-            hideLoading();
-            showToast(`เกิดข้อผิดพลาด: ${error.message}`);
-        });
+                        const payment = payments[key];
+                        // If paid, calculate refund amount
+                        if (payment.paid) {
+                            const studentClass = studentClassMap[payment.studentId];
+                            const amount = payment.amount || 100;
+                            if (studentClass == 1) {
+                                totalClass1Refund += amount;
+                            } else if (studentClass == 2) {
+                                totalClass2Refund += amount;
+                            }
+                        }
+                        // Mark payment for deletion
+                        updates['/payments/' + key] = null;
+                    });
+                    
+                    // 3. Update balances
+                    return database.ref('balances').transaction(currentBalances => {
+                        if (currentBalances) {
+                            currentBalances.class1 = Math.max(0, (currentBalances.class1 || 0) - totalClass1Refund);
+                            currentBalances.class2 = Math.max(0, (currentBalances.class2 || 0) - totalClass2Refund);
+                        }
+                        return currentBalances;
+                    });
+                })
+                .then(() => {
+                    // 4. Delete the actual payment records
+                    return database.ref().update(updates);
+                })
+                .then(() => {
+                    hideLoading();
+                    showToast('ลบเดือนและปรับปรุงยอดเงินสำเร็จ');
+                    loadPaymentData();
+                    loadBalanceData();
+                })
+                .catch(error => {
+                    if (error !== 'No data') {
+                       hideLoading();
+                       showToast(`เกิดข้อผิดพลาด: ${error.message}`);
+                    }
+                });
         }
+
 
         // ฟังก์ชันเพิ่มสมาชิก (admin)
         function handleAddStudent(e) {
@@ -1278,7 +1325,7 @@
                     if (snapshot.exists()) {
                         hideLoading();
                         showToast('มีรหัสนักศึกษานี้ในระบบแล้ว');
-                        return;
+                        return Promise.reject('Student exists');
                     }
                     const newUserKey = database.ref('users').push().key;
                     const userData = {
@@ -1288,25 +1335,23 @@
                         class: classNumber,
                         createdAt: firebase.database.ServerValue.TIMESTAMP
                     };
+
                     return database.ref('users/' + newUserKey).set(userData);
                 })
                 .then(() => {
                     // เพิ่ม payment สำหรับทุกเดือน-ปีที่มีอยู่ในระบบ
                     return database.ref('payments').once('value').then((paymentsSnapshot) => {
                         const payments = paymentsSnapshot.val() || {};
-                        const monthYearsSet = new Set();
+                        const monthYearsMap = new Map(); // Use Map to store amount
                         Object.values(payments).forEach(payment => {
                             if (payment.month && payment.year) {
-                                monthYearsSet.add(`${payment.month}-${payment.year}`);
+                                monthYearsMap.set(`${payment.month}-${payment.year}`, payment.amount || 100);
                             }
                         });
-                        if (monthYearsSet.size === 0) {
-                            const month = document.getElementById('monthSelect').value;
-                            const year = document.getElementById('yearSelect').value;
-                            monthYearsSet.add(`${month}-${year}`);
-                        }
+                        if (monthYearsMap.size === 0) return Promise.resolve();
+
                         const batch = {};
-                        monthYearsSet.forEach(monthYear => {
+                        monthYearsMap.forEach((amount, monthYear) => {
                             const [month, year] = monthYear.split('-');
                             const paymentKey = database.ref('payments').push().key;
                             batch[paymentKey] = {
@@ -1314,6 +1359,7 @@
                                 month: parseInt(month),
                                 year: year,
                                 paid: false,
+                                amount: amount,
                                 monthYear: `${month}-${year}`,
                                 timestamp: firebase.database.ServerValue.TIMESTAMP
                             };
@@ -1326,10 +1372,13 @@
                     closeAddStudentModal();
                     showToast('เพิ่มนักเรียนสำเร็จ');
                     loadPaymentData();
+                    loadMemberManageTable();
                 })
                 .catch((error) => {
-                    hideLoading();
-                    showToast(`เกิดข้อผิดพลาด: ${error.message}`);
+                    if (error !== 'Student exists') {
+                        hideLoading();
+                        showToast(`เกิดข้อผิดพลาด: ${error.message}`);
+                    }
                 });
         }
 
@@ -1376,15 +1425,12 @@
                     // Update balances
                     return database.ref('balances').transaction((balances) => {
                         if (!balances) balances = { class1: 0, class2: 0, central: 0 };
+                        const balanceKey = source === 'class1' ? 'class1' : source === 'class2' ? 'class2' : 'central';
+
                         if (type === 'income') {
-                            if (source === 'class1') balances.class1 += amount;
-                            else if (source === 'class2') balances.class2 += amount;
-                            else if (source === 'central') balances.central += amount;
-                            else if (source === 'central') balances.central += amount;
+                            balances[balanceKey] = (balances[balanceKey] || 0) + amount;
                         } else if (type === 'expense') {
-                            if (source === 'class1') balances.class1 = Math.max(0, balances.class1 - amount);
-                            else if (source === 'class2') balances.class2 = Math.max(0, balances.class2 - amount);
-                            else if (source === 'central') balances.central = Math.max(0, balances.central - amount);
+                             balances[balanceKey] = Math.max(0, (balances[balanceKey] || 0) - amount);
                         }
                         return balances;
                     });
@@ -1488,7 +1534,9 @@
 
         // Show edit activity modal
         function showEditActivityModal(activity) {
+            currentActivityId = activity.id;
             document.getElementById('editActivityId').value = activity.id;
+            document.getElementById('editActivityDate').value = activity.date;
             document.getElementById('editActivityDescription').value = activity.description;
             document.getElementById('editActivitySource').value = activity.source;
             document.getElementById('editActivityAmount').value = activity.amount;
@@ -1500,6 +1548,7 @@
         function closeEditActivityModal() {
             document.getElementById('editActivityModal').classList.add('hidden');
             document.getElementById('editActivityForm').reset();
+            currentActivityId = null;
         }
 
         // Handle edit activity
@@ -1508,52 +1557,42 @@
             showLoading();
 
             const id = document.getElementById('editActivityId').value;
-            const date = document.getElementById('editActivityDate').value;
-            const description = document.getElementById('editActivityDescription').value;
-            const source = document.getElementById('editActivitySource').value;
-            const amount = parseFloat(document.getElementById('editActivityAmount').value);
-            const type = document.getElementById('editActivityType').value;
+            const newActivity = {
+                date: document.getElementById('editActivityDate').value,
+                description: document.getElementById('editActivityDescription').value,
+                source: document.getElementById('editActivitySource').value,
+                amount: parseFloat(document.getElementById('editActivityAmount').value),
+                type: document.getElementById('editActivityType').value,
+            };
 
-            if (!id || !date || !description || !source || isNaN(amount) || !type) {
+            if (!id || !newActivity.date || !newActivity.description || !newActivity.source || isNaN(newActivity.amount) || !newActivity.type) {
                 hideLoading();
                 showToast('กรุณากรอกข้อมูลให้ครบถ้วน');
                 return;
             }
 
-            // Get old activity for balance adjustment
+            let oldActivity;
             database.ref('activities/' + id).once('value')
                 .then((snapshot) => {
-                    const oldActivity = snapshot.val();
-                    // Update activity
-                    return database.ref('activities/' + id).update({
-                        date, description, source, amount, type
-                    }).then(() => ({ oldActivity, newActivity: { source, amount, type } }));
+                    oldActivity = snapshot.val();
+                    return database.ref('activities/' + id).update(newActivity);
                 })
-                .then(({ oldActivity, newActivity }) => {
-                    // Adjust balances
+                .then(() => {
                     return database.ref('balances').transaction((balances) => {
                         if (!balances) balances = { class1: 0, class2: 0, central: 0 };
-                        // Undo old
-                        if (oldActivity) {
-                            if (oldActivity.type === 'income') {
-                                if (oldActivity.source === 'class1') balances.class1 -= oldActivity.amount;
-                                else if (oldActivity.source === 'class2') balances.class2 -= oldActivity.amount;
-                                else if (oldActivity.source === 'central') balances.central -= oldActivity.amount;
-                            } else if (oldActivity.type === 'expense') {
-                                if (oldActivity.source === 'class1') balances.class1 += oldActivity.amount;
-                                else if (oldActivity.source === 'class2') balances.class2 += oldActivity.amount;
-                                else if (oldActivity.source === 'central') balances.central += oldActivity.amount;
-                            }
+                        // Undo old activity's effect
+                        const oldBalanceKey = oldActivity.source === 'class1' ? 'class1' : oldActivity.source === 'class2' ? 'class2' : 'central';
+                        if (oldActivity.type === 'income') {
+                            balances[oldBalanceKey] -= oldActivity.amount;
+                        } else {
+                            balances[oldBalanceKey] += oldActivity.amount;
                         }
-                        // Apply new
+                        // Apply new activity's effect
+                        const newBalanceKey = newActivity.source === 'class1' ? 'class1' : newActivity.source === 'class2' ? 'class2' : 'central';
                         if (newActivity.type === 'income') {
-                            if (newActivity.source === 'class1') balances.class1 += newActivity.amount;
-                            else if (newActivity.source === 'class2') balances.class2 += newActivity.amount;
-                            else if (newActivity.source === 'central') balances.central += newActivity.amount;
-                        } else if (newActivity.type === 'expense') {
-                            if (newActivity.source === 'class1') balances.class1 = Math.max(0, balances.class1 - newActivity.amount);
-                            else if (newActivity.source === 'class2') balances.class2 = Math.max(0, balances.class2 - newActivity.amount);
-                            else if (newActivity.source === 'central') balances.central = Math.max(0, balances.central - newActivity.amount);
+                             balances[newBalanceKey] = (balances[newBalanceKey] || 0) + newActivity.amount;
+                        } else {
+                            balances[newBalanceKey] = Math.max(0, (balances[newBalanceKey] || 0) - newActivity.amount);
                         }
                         return balances;
                     });
@@ -1574,29 +1613,26 @@
 
         // Delete activity
         function deleteActivity() {
-            const id = document.getElementById('editActivityId').value;
-            if (!id) return;
+            const id = currentActivityId;
+            if (!id || !confirm('คุณต้องการลบกิจกรรมนี้ใช่หรือไม่?')) return;
+            
             showLoading();
-            // Get old activity for balance adjustment
+            let oldActivity;
             database.ref('activities/' + id).once('value')
                 .then((snapshot) => {
-                    const oldActivity = snapshot.val();
-                    return database.ref('activities/' + id).remove()
-                        .then(() => oldActivity);
+                    oldActivity = snapshot.val();
+                    if (!oldActivity) throw new Error("Activity not found");
+                    return database.ref('activities/' + id).remove();
                 })
-                .then((oldActivity) => {
+                .then(() => {
                     // Adjust balances
                     return database.ref('balances').transaction((balances) => {
-                        if (!balances) balances = { class1: 0, class2: 0, central: 0 };
-                        if (oldActivity) {
+                        if (balances && oldActivity) {
+                            const balanceKey = oldActivity.source === 'class1' ? 'class1' : oldActivity.source === 'class2' ? 'class2' : 'central';
                             if (oldActivity.type === 'income') {
-                                if (oldActivity.source === 'class1') balances.class1 -= oldActivity.amount;
-                                else if (oldActivity.source === 'class2') balances.class2 -= oldActivity.amount;
-                                else if (oldActivity.source === 'central') balances.central -= oldActivity.amount;
-                            } else if (oldActivity.type === 'expense') {
-                                if (oldActivity.source === 'class1') balances.class1 += oldActivity.amount;
-                                else if (oldActivity.source === 'class2') balances.class2 += oldActivity.amount;
-                                else if (oldActivity.source === 'central') balances.central += oldActivity.amount;
+                                balances[balanceKey] = Math.max(0, (balances[balanceKey] || 0) - oldActivity.amount);
+                            } else {
+                                balances[balanceKey] = (balances[balanceKey] || 0) + oldActivity.amount;
                             }
                         }
                         return balances;
@@ -1654,7 +1690,6 @@
                 });
         }
 
-        // Logout function
         function logout() {
             auth.signOut().then(() => {
                 showPage('homePage');
@@ -1662,8 +1697,6 @@
             });
         }
 
-        // โหลดข้อมูลสมาชิกสำหรับจัดการ
-        // ...existing code...
         function loadMemberManageTable() {
             const tableBody = document.getElementById('memberManageTable');
             tableBody.innerHTML = '<tr><td colspan="4" class="py-4 px-4 text-center text-gray-500">กำลังโหลดข้อมูล...</td></tr>';
@@ -1671,54 +1704,36 @@
                 .then(snapshot => {
                     tableBody.innerHTML = '';
                     if (!snapshot.exists()) {
-                        const row = document.createElement('tr');
-                        const cell = document.createElement('td');
-                        cell.colSpan = 4;
-                        cell.className = 'py-4 px-4 text-center text-gray-500';
-                        cell.textContent = 'ไม่พบข้อมูลสมาชิก';
-                        row.appendChild(cell);
-                        tableBody.appendChild(row);
+                        tableBody.innerHTML = '<tr><td colspan="4" class="py-4 px-4 text-center text-gray-500">ไม่พบข้อมูลสมาชิก</td></tr>';
                         return;
                     }
                     const users = snapshot.val();
-                    // แปลงเป็น array แล้ว sort ตาม studentId
                     const userArr = Object.keys(users).map(uid => ({ uid, ...users[uid] }));
                     userArr.sort((a, b) => a.studentId.localeCompare(b.studentId));
                     userArr.forEach(user => {
                         const row = document.createElement('tr');
         
-                        // รหัสนักศึกษา
                         const idCell = document.createElement('td');
                         idCell.className = 'py-3 px-4 border-b';
                         idCell.textContent = user.studentId;
                         row.appendChild(idCell);
         
-                        // ชื่อ
                         const nameCell = document.createElement('td');
                         nameCell.className = 'py-3 px-4 border-b';
                         nameCell.textContent = user.name;
                         row.appendChild(nameCell);
         
-                        // ห้อง (แก้ไขได้)
                         const classCell = document.createElement('td');
-                        classCell.className = 'py-3 px-4 border-b text-center';
-                        const classSelect = document.createElement('select');
-                        classSelect.className = 'border rounded px-2 py-1';
-                        classSelect.innerHTML = `
-                            <option value="1" ${user.class == 1 ? 'selected' : ''}>1</option>
-                            <option value="2" ${user.class == 2 ? 'selected' : ''}>2</option>
-                        `;
-                        classSelect.onchange = () => updateUserClass(user.uid, classSelect.value);
-                        classCell.appendChild(classSelect);
+                        classCell.className = 'py-3 px-4 border-b';
+                        classCell.textContent = user.class;
                         row.appendChild(classCell);
         
-                        // การจัดการ (ลบ)
                         const actionCell = document.createElement('td');
                         actionCell.className = 'py-3 px-4 border-b text-center';
                         const delBtn = document.createElement('button');
                         delBtn.className = 'bg-red-500 hover:bg-red-600 text-white text-xs py-1 px-3 rounded';
                         delBtn.textContent = 'ลบ';
-                        delBtn.onclick = () => deleteUser(user.uid, user.studentId);
+                        delBtn.onclick = () => deleteUser(user.uid, user.studentId, user.class);
                         actionCell.appendChild(delBtn);
                         row.appendChild(actionCell);
         
@@ -1727,7 +1742,6 @@
                 });
         }
 
-        // เรียกใช้เมื่อโหลดหน้า adminDashboard
         document.addEventListener('DOMContentLoaded', function() {
             // ...existing code...
             const classFilter = document.getElementById('classFilter');
@@ -1738,112 +1752,88 @@
             }
         });
 
-        // ฟังก์ชันแก้ไขห้อง
-        function updateUserClass(uid, newClass) {
+        function deleteUser(uid, studentId, studentClass) {
+            if (!confirm(`ต้องการลบสมาชิก ${studentId} หรือไม่? การชำระเงินทั้งหมดของสมาชิกนี้จะถูกลบและยอดเงินห้องจะถูกปรับปรุง`)) return;
             showLoading();
-            database.ref('users/' + uid + '/class').set(parseInt(newClass))
-                .then(() => {
-                    hideLoading();
-                    showToast('แก้ไขห้องสำเร็จ');
-                    loadPaymentData();
-                })
-                .catch(error => {
-                    hideLoading();
-                    showToast(`เกิดข้อผิดพลาด: ${error.message}`);
-                });
-        }
+            let totalPaidAmount = 0;
+            const updates = {};
+            // 1. Get all payments for this student
+            database.ref('payments').orderByChild('studentId').equalTo(studentId).once('value')
+                .then(snapshot => {
+                    const payments = snapshot.val() || {};
+                    Object.keys(payments).forEach(key => {
+                        const payment = payments[key];
+                        if (payment.paid) {
+                            totalPaidAmount += payment.amount || 100;
+                        }
+                        updates['/payments/' + key] = null; // Mark payment for deletion
+                    });
 
-        // ฟังก์ชันลบสมาชิl
-        function deleteUser(uid, studentId) {
-            if (!confirm(`ต้องการลบสมาชิก ${studentId} หรือไม่?`)) return;
-            showLoading();
-            // ลบ user
-            database.ref('users/' + uid).remove()
-                .then(() => {
-                    // ลบ payment ทั้งหมดของ studentId นี้
-                    return database.ref('payments').once('value').then(snapshot => {
-                        const payments = snapshot.val() || {};
-                        const updates = {};
-                        Object.keys(payments).forEach(key => {
-                            if (payments[key].studentId === studentId) {
-                                updates[key] = null;
-                            }
-                        });
-                        return database.ref('payments').update(updates);
+                    // 2. Adjust balance
+                    const balanceField = `class${studentClass}`;
+                    return database.ref('balances/' + balanceField).transaction(current => {
+                        return Math.max(0, (current || 0) - totalPaidAmount);
                     });
                 })
                 .then(() => {
+                    // 3. Delete payments
+                    return database.ref().update(updates);
+                })
+                .then(() => {
+                    // 4. Delete user
+                    return database.ref('users/' + uid).remove();
+                })
+                .then(() => {
                     hideLoading();
-                    showToast('ลบสมาชิกสำเร็จ');
+                    showToast('ลบสมาชิกและปรับปรุงข้อมูลสำเร็จ');
                     loadMemberManageTable();
                     loadPaymentData();
+                    loadBalanceData();
                 })
                 .catch(error => {
                     hideLoading();
                     showToast(`เกิดข้อผิดพลาด: ${error.message}`);
                 });
         }
-
-        // เรียกโหลดข้อมูลสมาชิกเมื่อเข้าแดชบอร์ดเหรัญญิก
-        function showPage(pageId) {
-            // Hide all pages
-            document.querySelectorAll('#homePage, #loginPage, #registerPage, #studentDashboard, #adminDashboard').forEach(page => {
-                page.classList.add('hidden');
-            });
-            // Show the requested page
-            document.getElementById(pageId).classList.remove('hidden');
-            if (pageId === 'adminDashboard') {
-                loadMemberManageTable();
-            }
-        }
-
-        function togglePaymentStatus(studentId, month, year, newStatus, classNumber) {
+        
+        function togglePaymentStatus(studentId, month, year, newStatus, classNumber, amount) {
             showLoading();
-            // ค้นหา payment record ที่ตรงกับ studentId, month, year
-            database.ref('payments').once('value')
+            const monthYear = `${month}-${year}`;
+            database.ref('payments').orderByChild('monthYear').equalTo(monthYear).once('value')
                 .then(snapshot => {
                     const payments = snapshot.val() || {};
                     let paymentKey = null;
-                    Object.keys(payments).forEach(key => {
-                        const p = payments[key];
-                        if (
-                            p.studentId === studentId &&
-                            parseInt(p.month) === parseInt(month) &&
-                            (p.year == year || parseInt(p.year) === parseInt(year))
-                        ) {
+                    
+                    for(const key in payments) {
+                        if(payments[key].studentId === studentId) {
                             paymentKey = key;
+                            break;
                         }
-                    });
+                    }
+
                     if (paymentKey) {
                         return database.ref('payments/' + paymentKey).update({ paid: newStatus });
                     } else {
-                        // ถ้าไม่มี record ให้สร้างใหม่
+                        // This case should ideally not happen if a month exists, but as a fallback:
                         const newKey = database.ref('payments').push().key;
                         return database.ref('payments/' + newKey).set({
                             studentId: studentId,
                             month: parseInt(month),
                             year: year,
                             paid: newStatus,
-                            monthYear: `${month}-${year}`,
+                            amount: amount,
+                            monthYear: monthYear,
                             timestamp: firebase.database.ServerValue.TIMESTAMP
                         });
                     }
                 })
                 .then(() => {
-                    // ถ้า newStatus เป็น true (ชำระเงิน) ให้บวกยอดเงิน +100 บาท
-                    if (newStatus) {
-                        // classNumber: 1 หรือ 2
-                        const balanceField = classNumber == 1 ? 'class1' : 'class2';
-                        return database.ref('balances/' + balanceField).transaction(current => {
-                            return (current || 0) + 100;
-                        });
-                    } else {
-                        // ถ้ายกเลิกชำระเงิน ให้ลดยอดเงิน -100 บาท
-                        const balanceField = classNumber == 1 ? 'class1' : 'class2';
-                        return database.ref('balances/' + balanceField).transaction(current => {
-                            return Math.max(0, (current || 0) - 100);
-                        });
-                    }
+                    const balanceField = `class${classNumber}`;
+                    const adjustment = newStatus ? amount : -amount;
+                    return database.ref('balances/' + balanceField).transaction(current => {
+                        const newBalance = (current || 0) + adjustment;
+                        return Math.max(0, newBalance);
+                    });
                 })
                 .then(() => {
                     hideLoading();
@@ -1854,6 +1844,118 @@
                     hideLoading();
                     showToast(`เกิดข้อผิดพลาด: ${error.message}`);
                 });
+        }
+        
+        // ---- NEW FUNCTIONS FOR EDITING MONTH AMOUNT ----
+
+        function showEditMonthModal(month, year) {
+            // Find the current amount for this month to pre-fill
+            database.ref('payments').orderByChild('monthYear').equalTo(`${month}-${year}`).limitToFirst(1).once('value')
+                .then(snapshot => {
+                    let currentAmount = 100; // Default
+                    if (snapshot.exists()) {
+                        const payment = Object.values(snapshot.val())[0];
+                        currentAmount = payment.amount;
+                    }
+                    document.getElementById('editMonthModalTitle').textContent = `แก้ไขยอดเงินเดือน ${thaiMonths[month - 1]} ${parseInt(year) + 543}`;
+                    document.getElementById('editMonthMonth').value = month;
+                    document.getElementById('editMonthYear').value = year;
+                    document.getElementById('editMonthAmount').value = currentAmount;
+                    document.getElementById('editMonthModal').classList.remove('hidden');
+                });
+        }
+
+        function closeEditMonthModal() {
+            document.getElementById('editMonthModal').classList.add('hidden');
+            document.getElementById('editMonthForm').reset();
+        }
+
+        async function handleEditMonthAmount(e) {
+            e.preventDefault();
+            showLoading();
+
+            const month = document.getElementById('editMonthMonth').value;
+            const year = document.getElementById('editMonthYear').value;
+            const newAmount = parseInt(document.getElementById('editMonthAmount').value);
+            const monthYear = `${month}-${year}`;
+
+            if (isNaN(newAmount) || newAmount <= 0) {
+                hideLoading();
+                showToast('กรุณากรอกจำนวนเงินที่ถูกต้อง');
+                return;
+            }
+
+            try {
+                // 1. Get all users to map studentId to class
+                const usersSnapshot = await database.ref('users').orderByChild('role').equalTo('member').once('value');
+                const studentClassMap = {};
+                usersSnapshot.forEach(snap => {
+                    const user = snap.val();
+                    studentClassMap[user.studentId] = user.class;
+                });
+
+                // 2. Get all payments for the specific month/year
+                const paymentsSnapshot = await database.ref('payments').orderByChild('monthYear').equalTo(monthYear).once('value');
+                if (!paymentsSnapshot.exists()) {
+                    hideLoading();
+                    showToast('ไม่พบข้อมูลการชำระเงินสำหรับเดือนนี้');
+                    return;
+                }
+
+                let class1Adjustment = 0;
+                let class2Adjustment = 0;
+                const paymentUpdates = {};
+
+                paymentsSnapshot.forEach(snap => {
+                    const payment = snap.val();
+                    const paymentKey = snap.key;
+                    const oldAmount = payment.amount || 100;
+                    
+                    // If paid, calculate the difference for balance adjustment
+                    if (payment.paid) {
+                        const diff = newAmount - oldAmount;
+                        const studentClass = studentClassMap[payment.studentId];
+                        if (studentClass == 1) {
+                            class1Adjustment += diff;
+                        } else if (studentClass == 2) {
+                            class2Adjustment += diff;
+                        }
+                    }
+                    
+                    // Prepare to update the amount for this payment record
+                    paymentUpdates[`/payments/${paymentKey}/amount`] = newAmount;
+                });
+
+                // 3. Apply all updates
+                // First, update payment amounts
+                await database.ref().update(paymentUpdates);
+                
+                // Then, adjust balances in a transaction
+                await database.ref('balances').transaction(currentBalances => {
+                    if (currentBalances) {
+                        currentBalances.class1 = Math.max(0, (currentBalances.class1 || 0) + class1Adjustment);
+                        currentBalances.class2 = Math.max(0, (currentBalances.class2 || 0) + class2Adjustment);
+                    } else { // Should not happen if system is used, but for safety
+                        currentBalances = {
+                            class1: Math.max(0, class1Adjustment),
+                            class2: Math.max(0, class2Adjustment),
+                            central: 0
+                        };
+                    }
+                    return currentBalances;
+                });
+
+                hideLoading();
+                closeEditMonthModal();
+                showToast('แก้ไขยอดเงินและปรับปรุงข้อมูลสำเร็จ');
+                loadPaymentData();
+                loadBalanceData();
+
+            } catch (error) {
+                hideLoading();
+                console.error("Error editing month amount:", error);
+                showToast(`เกิดข้อผิดพลาด: ${error.message}`);
+            }
         }
     </script>
 </body>
